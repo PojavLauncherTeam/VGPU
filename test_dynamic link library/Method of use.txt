@@ -1,0 +1,28 @@
+   
+   
+   Terminal compilation command
+   
+   gcc -shared -fPIC main.c -o libday.so   //Create a dynamic link library
+   
+   gcc -o a a.c ./libday.so   //Compile with linking the dynamic link library in the same directory
+   							  //Don't use " gcc -o a a.c -L./ -lday "
+   							  //It's not very convenient and it might give an error
+   
+   Run it
+   
+   ./a
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
