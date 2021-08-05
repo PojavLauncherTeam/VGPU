@@ -67,7 +67,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
     //num_add_f(glshader_converted);
   	// ======== from int to float
   	int_to_float(glshader_converted, vsh);//				Printf("!", __LINE__);
-  	
+  	fix_const(glshader_converted);
 	// ======== Keyword
 	if(vsh){
 		/*
@@ -114,14 +114,16 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	
 	
 	// ======== Built-in function
-	
+	pot = replace("texture2D", "texture", glshader_converted);
 	//char * isshadow = strstr(*glshader_converted, "shadow");				printf("shadow = %p \n", isshadow);
 	//if(isshadow){
-	pot = replace("textureSize", "textureSize_", glshader_converted);
+	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
+	pot = replace("texelFetch", "texelFetch_", glshader_converted);
+	pot = replace("textureGather", "textureGather_", glshader_converted);
+	//pot = replace("Offset", "Offset_", glshader_converted);
 	func_build_in(glshader_converted, cut_in_offset, SHADOW);//				Printf("!", __LINE__);
 	//}
 	
-	pot = replace("texture2D", "texture", glshader_converted);
 	
 	func_name_conv("texture", glshader_converted);//				Printf("!", __LINE__);						// Prevent conflict between variable name and function name.
 	
@@ -173,20 +175,61 @@ static char _shadow2D[]=
 "precision highp vec3; precision mediump ivec3;\n"
 "precision highp vec4; precision mediump ivec4;\n"
 */
-"vec2 textureSize_(sampler2D tex, float lod){\n"
+"vec4 texelFetch_(sampler2D tex, vec2 P, float lod){\n"				// Fix functions that contain integer type.
+" return texelFetch(tex, ivec2(int(P.x), int(P.y)), int(lod));\n"
+"}"
+/*
+"vec4 texelFetch_Offset_(sampler2D tex, vec2 P, float lod, vec2 offset_){\n"				// texelFetchOffset
+" vec2 offset = offset_;\n"
+" return texelFetchOffset(tex, ivec2(int(P.x), int(P.y)), int(lod), ivec2(int(offset.x), int(offset.y)));\n"
+"}"
+"vec4 textureLodOffset_(sampler2D tex, vec2 P, float lod, vec2 offset_){\n"				// textureLodOffset
+" vec2 offset = offset_;\n"
+" return textureLodOffset(tex, P, lod, ivec2(int(offset.x), int(offset.y)));\n"
+"}"
+"vec4 textureGradOffset_(sampler2D tex, vec2 P, vec2 dPdx, vec2 dPdy, vec2 offset_){\n"				// textureGradOffset
+" vec2 offset = offset_;\n"
+" return textureGradOffset(tex, P, dPdx, dPdy, ivec2(int(offset.x), int(offset.y)));\n"
+"}"
+"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset_){\n"				// textureOffset
+" vec2 offset = offset_;\n"
+" return textureOffset(tex, P, ivec2(int(offset.x), int(offset.y)));\n"
+"}"
+"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset_, float bias){\n"
+" vec2 offset = offset_;\n"
+" return textureOffset(tex, P, ivec2(int(offset.x), int(offset.y)), bias);\n"
+"}"
+*/
+"vec2 textureSize_(sampler2D tex, float lod){\n"				// textureSize
 " ivec2 Size = textureSize(tex, int(lod));\n"
 " return vec2(float(Size.x), float(Size.y));\n"
 "}"
-/*"vec2 textureSize_(sampler2DShadow tex, float lod){\n"
+"vec2 textureSize_(sampler2DShadow tex, float lod){\n"
 " ivec2 Size = textureSize(tex, int(lod));\n"
 " return vec2(float(Size.x), float(Size.y));\n"
-"}"*/
-"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, float level){\n"
-" return vec3(textureLod(shadow, coord, level), 0.0, 0.0);\n"
 "}"
+"vec4 textureGather_(sampler2D tex, vec2 P){\n"				// textureGather
+" return textureGather(tex, P);\n"
+"}"
+"vec4 textureGather_(sampler2D tex, vec2 P, float comp){\n"
+" return textureGather(tex, P, int(comp));\n"
+"}"
+/*
+"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset_){\n"
+" vec2 offset = offset_;\n"
+" return textureGatherOffset(tex, P, ivec2(int(offset.x), int(offset.y)));\n"
+"}"
+"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset_, float comp){\n"
+" vec2 offset = offset_;\n"
+" return textureGatherOffset(tex, P, ivec2(int(offset.x), int(offset.y)), int(comp));\n"
+"}"
+*/
 /*"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, int level){\n"
 " return vec3(textureLod(shadow, coord, float(level)), 0.0, 0.0);\n"
 "}"*/
+"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, float level){\n"				// shadow2D wrapper
+" return vec3(textureLod(shadow, coord, level), 0.0, 0.0);\n"
+"}"
 "vec3 shadow2D(sampler2DShadow shadow, vec3 coord){\n"
 " return vec3(texture(shadow, coord), 0.0, 0.0);\n"
 "}\n"
@@ -866,7 +909,13 @@ void func_name_conv(char *A, char **source){//				Printf("&&&&\nStart %d \n&&&&"
 
 
 
+void fix_const(char **source){
+	return;
+}
 
+void skip_block(char **source){
+	return;
+}
 
 void add_marker(char **converted){// ##FIX_MARKER_VGPU##
 	int lenS = strlen(*converted);

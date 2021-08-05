@@ -14,3 +14,5 @@ extern int len_name(char *);
 extern void cut_in_constructor(char *, char **);
 extern void fix_marker(char **);
 extern void add_marker(char **);
+extern void fix_const(char **);
+extern void skip_block(char **);
