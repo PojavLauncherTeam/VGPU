@@ -1,7 +1,0 @@
-Compile and run:
-gcc -o a Batch_.c shader.c
-./a
-
-It will output a converted shader file.
-You can also use one of the three functions separately.
-Note: The "char ** ptrA" in the argument to the replace() requires a pointer to the pointer to the string.
