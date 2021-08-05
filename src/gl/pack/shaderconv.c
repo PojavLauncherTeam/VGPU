@@ -165,6 +165,14 @@ static char _texture2DLod[]=
 "}"
 ;
 static char _shadow2D[]=
+"precision mediump sampler2DShadow;\n"
+"precision highp float;\n"
+"precision mediump int;\n"
+/*
+"precision highp vec2; precision mediump ivec2;\n"
+"precision highp vec3; precision mediump ivec3;\n"
+"precision highp vec4; precision mediump ivec4;\n"
+*/
 "vec2 textureSize_(sampler2D tex, float lod){\n"
 " ivec2 Size = textureSize(tex, int(lod));\n"
 " return vec2(float(Size.x), float(Size.y));\n"
@@ -181,8 +189,7 @@ static char _shadow2D[]=
 "}"*/
 "vec3 shadow2D(sampler2DShadow shadow, vec3 coord){\n"
 " return vec3(texture(shadow, coord), 0.0, 0.0);\n"
-"}"
-"precision mediump sampler2DShadow;\n"
+"}\n"
 ;
 
 

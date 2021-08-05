@@ -277,10 +277,10 @@ static const char* gl_TexMatrixSources[] = {
 };
 
 static const char* GLESHeader[] = {
-  "#version 100\n%sprecision %s float;\nprecision %s int;\n",
-  "#version 300 es\n%sprecision %s float;\nprecision %s int;\n",
-  "#version 310 es\n%sprecision %s float;\nprecision %s int;\n",
-  "#version 320 es\n%sprecision %s float;\nprecision %s int;\n"
+  "#version 100\n%s",
+  "#version 300 es\n%s",
+  "#version 310 es\n%s",
+  "#version 320 es\n%s",
 };
 
 static const char* gl4es_transpose =
@@ -468,7 +468,7 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
         /* else no location or in / out are supported */
   //}
   //sprintf(GLESFullHeader, GLESHeader, (wanthighp && hardext.highp==1 && !isVertex)?GLESUseFragHighp:"", (wanthighp)?"highp":"mediump", (wanthighp)?"highp":"mediump");
-  sprintf(GLESFullHeader, GLESHeader[versionHeader], "", "highp", "mediump");
+  sprintf(GLESFullHeader, GLESHeader[versionHeader], "");
 
   int tmpsize = strlen(pBuffer)*2+strlen(GLESFullHeader)+100;
   char* Tmp = (char*)calloc(1, tmpsize);
