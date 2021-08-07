@@ -63,7 +63,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	if(vsh){
   		in_to_attribute(glshader_converted);				// in >> attribute
   	}
-  	add_marker(glshader_converted);
+  	//add_marker(glshader_converted);
+  	fix_const("const ", glshader_converted);
   	pot = replace("#ext", "//#ext", glshader_converted);				// #extension
   	
   	// >>>>fixed for GLSL3.x
@@ -73,7 +74,6 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
     //num_add_f(glshader_converted);
   	// ======== from int to float
   	int_to_float(glshader_converted, vsh);//				Printf("!", __LINE__);
-  	fix_const(glshader_converted);
 	// ======== Keyword
 	if(vsh){
 		/*
@@ -1268,24 +1268,104 @@ void func_name_conv(char *A, char **source){//				Printf("&&&&\nStart %d \n&&&&"
 }
 
 
-
-void fix_const(char **source){
-/*	int lenS = strlen(*source);
-	char * ptrS = *source;
-	for(int n=0; n<lenS; n++){
-	
-	
-	
-	}*/
-		
-	
-	
-	
+void replace_with_space(char *ptr, int len){
+	for(int n=0; n<len; n++){
+		ptr[n]=' ';
+	}
 	return;
 }
 
-void skip_block(char **source){
+void fix_const(char *const_, char **source){
+	int num_const = 0;
+	int len_const = strlen(const_);
+	int lenS = strlen(*source);
+	int len_block = lenS;
+	char * ptrS = *source;
+	char * ptrS_end = *source+lenS;
+	char * left=ptrS;
+	char * right=ptrS_end;
+	char * ptr=ptrS;
+	int isblock=0, isconst=0;
+	for(int n=0; n<lenS; n++){
+		if(n==0){
+			isblock=skip_block("{", "}", ptrS, ptrS_end, &left, &right);
+		}
+		if(isblock){
+			n=left-ptrS;
+			len_block=right-left;
+			len_block -= len_const;
+			len_block++;
+			len_block += n;
+			for(n=n; n<len_block; n++){								// replace "const" inside the block with some spaces.
+				for(int m=0; m<len_const; m++){
+					if(ptr[n+m]==const_[m]){
+						isconst++;
+						continue;
+					}else{
+						isconst=0;
+						break;
+					}
+				}
+				if(isconst){
+					num_const++;
+					replace_with_space(ptr+n, len_const);
+				}
+			}
+			isblock=0;
+			if(right!=ptrS_end){
+				right++;
+				if(right!=ptrS_end){
+					isblock=skip_block("{", "}", right, ptrS_end, &left, &right);				// find the next block.
+				}
+			}
+			continue;
+		}else{
+			break;
+		}
+	}
+					Printf("num_const = %d \n", num_const);
 	return;
+}
+
+int skip_block(char *left, char *right, char *start, char *end, char **ptr_left, char **ptr_right){
+	int len = end - start;
+	int n=0, n_left=0, state=0;
+	int num_left=0, num_right=0, isleft=0;
+	int len_left=strlen(left), len_right=strlen(right);
+	for(n=0; n<len; n++){
+		if(strncmp(start+n, left, len_left)==0){
+			if(isleft==0){
+				n_left=n;
+			}
+			isleft=1;
+			num_left++;
+		}
+		if(strncmp(start+n, right, len_right)==0){
+			num_right++;
+		}
+		if(num_left!=0 || num_right!=0){
+        	if((num_left-num_right)==0){				// "...{......}..."
+        		*ptr_left=start+n_left;
+        		*ptr_right=start+n;
+        		state=1;
+        		break;
+        	}
+        	if((num_left-num_right)<0){				// "......}......"
+        		*ptr_left=start;
+        		*ptr_right=start+n;
+        		state=1;
+        		break;
+        	}
+        }
+    }
+	if(state==0){
+    	if((num_left-num_right)>0){				// "......{......"
+    		*ptr_left=start+n_left;
+    		*ptr_right=end;
+    	}
+    }
+    
+	return num_left+num_right;
 }
 
 

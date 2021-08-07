@@ -14,7 +14,10 @@ extern int len_name(char *);
 extern void cut_in_constructor(char *, char **);
 extern void fix_marker(char **);
 extern void add_marker(char **);
-extern void fix_const(char **);
-extern void skip_block(char **);
+extern void fix_const(char *, char **);
+extern int skip_block(char *, char *, char *, char *, char **, char **);
 extern void in_to_attribute(char **);
 extern void fix_layout(char **);
+
+
+extern void replace_with_space(char *, int);
