@@ -21,3 +21,4 @@ extern void fix_layout(char **);
 
 
 extern void replace_with_space(char *, int);
+extern void GLSLHeader(char **);

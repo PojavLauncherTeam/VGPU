@@ -5,11 +5,11 @@
 
 #include "shaderconv.h"
 #include "shader.h"
-/*
+
 #include <android/log.h>
 #define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
-*/
-#define Printf(...) printf(__VA_ARGS__)
+
+//#define Printf(...) printf(__VA_ARGS__)
 
 /*#define Printf_ \
 		Printf("========NewConvertShader : \n"); \
@@ -63,7 +63,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	if(vsh){
   		in_to_attribute(glshader_converted);				// in >> attribute
   	}
-  	add_marker(glshader_converted);
+  	//add_marker(glshader_converted);
   	fix_const("const ", glshader_converted);
   	pot = replace("#ext", "//#ext", glshader_converted);				// #extension
   	
@@ -178,7 +178,7 @@ static char _shadow2D[]=
 "precision highp vec2; precision mediump ivec2;\n"
 "precision highp vec3; precision mediump ivec3;\n"
 "precision highp vec4; precision mediump ivec4;\n"
-*//*
+*/
 "vec4 texelFetch_(sampler2D tex, vec2 P, float lod){\n"				// Fix functions that contain integer type.
 " return texelFetch(tex, ivec2(int(P.x), int(P.y)), int(lod));\n"
 "}"
@@ -222,7 +222,7 @@ static char _shadow2D[]=
 "vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset, float comp){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)), int(comp));\n"
-"}"*/
+"}"
 /*"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, int level){\n"
 " return vec3(textureLod(shadow, coord, float(level)), 0.0, 0.0);\n"
 "}"*/

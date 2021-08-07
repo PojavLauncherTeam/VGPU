@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "../../glx/hardext.h"
 #include "shaderconv.h"
 #include "shader.h"
 
@@ -54,12 +55,12 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	else
   		vsh = 0;
   	
+	GLSLHeader(glshader_converted);
   	int cut_in_offset = strstr(*glshader_converted, "0 es") + 5 - *glshader_converted;//				Printf(" cut_in_offset = %d ", cut_in_offset);
   	char * ptr_cut_in = *glshader_converted + cut_in_offset;
   	
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
-  	//pot = replace("const ", "", glshader_converted);
   	if(vsh){
   		in_to_attribute(glshader_converted);				// in >> attribute
   	}
@@ -249,7 +250,23 @@ void func_build_in(char **converted, int cut_in_offset, int type){//				Printf("
 }
 
 
-
+void GLSLHeader(char **source){
+	int pot;
+	if(hardext.glsl320es){
+  		pot = replace_common("#version 100", "#version 320 es", source, 1);
+  		return;
+  	}
+  	if(hardext.glsl310es){
+  		pot = replace_common("#version 100", "#version 310 es", source, 1);
+  		return;
+  	}
+  	if(hardext.glsl300es){
+  		pot = replace_common("#version 100", "#version 300 es", source, 1);
+  		return;
+  	}
+  	return;
+}
+  	
 
 void num_add_f(char **source){//				Printf("&&&&\nStart %d \n&&&&", __LINE__);
 	char * ptr = *source;

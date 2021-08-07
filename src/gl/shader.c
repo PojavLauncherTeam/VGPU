@@ -34,11 +34,11 @@ int pot;
 KHASH_MAP_IMPL_INT(shaderlist, shader_t *);
 
 GLuint gl4es_glCreateShader(GLenum shaderType) {
-    DBG(printf("glCreateShader(%s)\n", PrintEnum(shaderType));)
+    //DBG(printf("glCreateShader(%s)\n", PrintEnum(shaderType));)
     
     // sanity check
     if (shaderType!=GL_VERTEX_SHADER && shaderType!=GL_FRAGMENT_SHADER) {
-        DBG(printf("Invalid shader type\n");)
+        //DBG(printf("Invalid shader type\n");)
         errorShim(GL_INVALID_ENUM);
         return 0;
     }
@@ -49,7 +49,7 @@ GLuint gl4es_glCreateShader(GLenum shaderType) {
     if(gles_glCreateShader) {
         shader = gles_glCreateShader(shaderType);
         if(!shader) {
-            DBG(printf("Failed to create shader\n");)
+            //DBG(printf("Failed to create shader\n");)
             errorGL();
             return 0;
         }
@@ -113,7 +113,7 @@ void actualy_detachshader(GLuint shader) {
 }
 
 void gl4es_glDeleteShader(GLuint shader) {
-    DBG(printf("glDeleteShader(%d)\n", shader);)
+    //DBG(printf("glDeleteShader(%d)\n", shader);)
     // sanity check...
     CHECK_SHADER(void, shader)
     // delete the shader from the list
@@ -136,7 +136,7 @@ void gl4es_glDeleteShader(GLuint shader) {
 }
 
 void gl4es_glCompileShader(GLuint shader) {
-    //DBG(printf("glCompileShader(%d)\n", shader);)
+    ////DBG(printf("glCompileShader(%d)\n", shader);)
     // look for the shader
     CHECK_SHADER(void, shader)
 
@@ -166,7 +166,7 @@ void gl4es_glCompileShader(GLuint shader) {
 }
 
 void gl4es_glShaderSource(GLuint shader, GLsizei count, const GLchar * const *string, const GLint *length) {
-    //DBG(printf("glShaderSource(%d, %d, %p, %p)\n", shader, count, string, length);)
+    ////DBG(printf("glShaderSource(%d, %d, %p, %p)\n", shader, count, string, length);)
     // sanity check
     if(count<=0) {
         errorShim(GL_INVALID_VALUE);
@@ -244,7 +244,7 @@ void gl4es_glShaderSource(GLuint shader, GLsizei count, const GLchar * const *st
         Printf("\n========\n ");
 		
         // send source to GLES2 hardware if any
-        gles_glShaderSource(shader, 1, (const GLchar * const*)((glshader->converted)?(&glshader->converted):(&glshader->source)), NULL);
+        gles_glShaderSource(shader, 1, (const GLchar * const*)(&glshader->converted), NULL);
         errorGL();
     } else
         noerrorShim();
@@ -297,15 +297,22 @@ void redoShader(GLuint shader, shaderconv_need_t *need) {
         return;
     free(glshader->converted);
     memcpy(&glshader->need, need, sizeof(shaderconv_need_t));
-    glshader->converted = ConvertShader(glshader->source, glshader->type==GL_VERTEX_SHADER?1:0, &glshader->need);
+    //glshader->converted = ConvertShader(glshader->source, glshader->type==GL_VERTEX_SHADER?1:0, &glshader->need);
     // send source to GLES2 hardware if any
-    gles_glShaderSource(shader, 1, (const GLchar * const*)((glshader->converted)?(&glshader->converted):(&glshader->source)), NULL);
+    
+    int len_source = strlen(glshader->source);
+    char * source_ = (char *)malloc(len_source+1);
+    memmove(source_, glshader->source, len_source);
+    source_[len_source] = '\0';
+    gl4es_glShaderSource(shader, 1, (const GLchar * const*)(&source_), NULL);
+    free(source_);
     // recompile...
     gl4es_glCompileShader(glshader->id);
+    
 }
 
 void gl4es_glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) {
-    DBG(printf("glGetShaderSource(%d, %d, %p, %p)\n", shader, bufSize, length, source);)
+    //DBG(printf("glGetShaderSource(%d, %d, %p, %p)\n", shader, bufSize, length, source);)
     // find shader
     CHECK_SHADER(void, shader)
     if (bufSize<=0) {
@@ -329,7 +336,7 @@ void gl4es_glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GL
 }
 
 GLboolean gl4es_glIsShader(GLuint shader) {
-    DBG(printf("glIsShader(%d)\n", shader);)
+    //DBG(printf("glIsShader(%d)\n", shader);)
     // find shader
     shader_t *glshader = NULL;
     khint_t k;
@@ -358,7 +365,7 @@ shader_t *getShader(GLuint shader) {
 static const char* GLES_NoGLSLSupport = "No Shader support with current backend";
 
 void gl4es_glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei *length, GLchar *infoLog) {
-    DBG(printf("glGetShaderInfoLog(%d, %d, %p, %p)\n", shader, maxLength, length, infoLog);)
+    //DBG(printf("glGetShaderInfoLog(%d, %d, %p, %p)\n", shader, maxLength, length, infoLog);)
     // find shader
     CHECK_SHADER(void, shader)
     if(maxLength<=0) {
@@ -376,7 +383,7 @@ void gl4es_glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei *length,
 }
 
 void gl4es_glGetShaderiv(GLuint shader, GLenum pname, GLint *params) {
-    DBG(printf("glGetShaderiv(%d, %s, %p)\n", shader, PrintEnum(pname), params);)
+    //DBG(printf("glGetShaderiv(%d, %s, %p)\n", shader, PrintEnum(pname), params);)
     // find shader
     CHECK_SHADER(void, shader)
     LOAD_GLES2(glGetShaderiv);
