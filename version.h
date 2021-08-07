@@ -11,6 +11,6 @@
 
 #define MAJOR_ 1
 #define MINOR_ 3
-#define REVISION_ 0
+#define REVISION_ 4
 
 #endif

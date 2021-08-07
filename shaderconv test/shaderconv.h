@@ -12,3 +12,9 @@ extern void shader_conv_(char **, char **);
 
 extern int len_name(char *);
 extern void cut_in_constructor(char *, char **);
+extern void fix_marker(char **);
+extern void add_marker(char **);
+extern void fix_const(char **);
+extern void skip_block(char **);
+extern void in_to_attribute(char **);
+extern void fix_layout(char **);

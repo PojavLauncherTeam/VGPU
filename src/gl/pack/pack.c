@@ -227,7 +227,7 @@ void glGetIntegerv (GLenum pname, GLint *data){    _LOAD_GLES
 const GLubyte *glGetString (GLenum name){    _LOAD_GLES    
  
  if(name == GL_RENDERER){
-  return (const GLubyte *)"vgpu 1.3.0";
+  return (const GLubyte *)"vgpu 1.3.4";
  }
  if(name == GL_VERSION){
   return (const GLubyte *)"4.4";
@@ -1221,7 +1221,7 @@ void glEndConditionalRender (void){    _LOAD_GLES
 }
 
 void glVertexAttribIPointer (GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer){    _LOAD_GLES    
- _gles_glVertexAttribIPointer (index, size, type, stride, pointer);
+ _gles_glVertexAttribIPointer (index, size, type, stride, pointer);				// Direct conversion to int.
 
 }
 

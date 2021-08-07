@@ -16,3 +16,5 @@ extern void fix_marker(char **);
 extern void add_marker(char **);
 extern void fix_const(char **);
 extern void skip_block(char **);
+extern void in_to_attribute(char **);
+extern void fix_layout(char **);

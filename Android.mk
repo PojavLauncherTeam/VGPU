@@ -8,7 +8,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vgpu_130
+LOCAL_MODULE := vgpu
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
 

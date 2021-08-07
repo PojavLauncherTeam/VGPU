@@ -60,9 +60,15 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
   	//pot = replace("const ", "", glshader_converted);
-  	
-  	//add_marker(glshader_converted);
+  	if(vsh){
+  		in_to_attribute(glshader_converted);				// in >> attribute
+  	}
+  	add_marker(glshader_converted);
   	pot = replace("#ext", "//#ext", glshader_converted);				// #extension
+  	
+  	// >>>>fixed for GLSL3.x
+  	fix_layout(glshader_converted);
+  	
   	// ======== Handling the first half of an implicit type conversion.
     //num_add_f(glshader_converted);
   	// ======== from int to float
@@ -139,9 +145,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	pot = replace("]", ")]", glshader_converted);//				Printf("!", __LINE__);
 	
 	// ======== some fix
-	fix_marker(glshader_converted);
-	// >>>>fixed for GLSL3.x
-	
+	fix_marker(glshader_converted);	
 	
 	//				Printf("&&&&\nEnd %d \n&&&&", __LINE__);
 	return;
@@ -356,15 +360,188 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	int len_uniform = strlen("uniform");
 	int len_attribute = strlen("attribute");
 	int lenS = strlen(*source);
+	
+	
+	// >>>> uniform
+	cut_in_constructor("uniform", source);				// int/ivec2/3/4 >> float/vec2/3/4
+					Printf(" vsh = %d", vsh);
+	// >>>> attribute
+	if(vsh){
+		cut_in_constructor("attribute", source);				// int/ivec2/3/4 >> ivec4 >> float/vec2/3/4
+	}
+	
+	
+	// uint
+	int len_uint = strlen("uint");
+	int len_s_to_m = 0;
+	int num_uint = 0;
+	int num_uint_ = 0;
+	char **ptr_uint = (char **)malloc( ((uint)(lenS/len_uint)+1)*sizeof(char*) );
+	//char **ptr_uint_ = (char **)malloc( ((uint)(lenS/len_uint)+1)*sizeof(char*) );
+	pot = find("uint", "uint", source, ptr_uint, &num_uint);
+	char *ptrm = NULL;
+	for(int n=0; n<num_uint; n++){
+		ptrm = ptr_uint[n];
+		*ptrm = '\0';
+		len_s_to_m = ptrm - *source;
+		for(int m=0; m<len_s_to_m; m++){
+			if(m==0){continue;}
+			if(*(ptrm-m)=='\n'){break;}
+			if(*(ptrm-m)==' '){						// Check backwards from "uint" position to see if the string has "uniform" and "attribute", and make sure the path is full of spaces ' '.
+				continue;
+			}else{
+				if(*(ptrm-m-1)=='r' && *(ptrm-m)=='m'){				// First, fuzzy judgment is carried out to reduce the consumption caused by the string comparison function.
+					if(*(ptrm-m-len_uniform)=='\n' || *(ptrm-m-len_uniform)==';' || *(ptrm-m-len_uniform)==' '){
+    					if(strncmp(ptrm-m-len_uniform+1, "uniform", len_uniform)==0){
+    						memmove(ptr_uint[n], "####", 4);
+    						//ptr_uint_[num_uint_]=ptr_uint[n];
+    						num_uint_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='t' && *(ptrm-m)=='e'){
+					if(*(ptrm-m-len_attribute)=='\n' || *(ptrm-m-len_attribute)==';' || *(ptrm-m-len_attribute)==' '){
+    					if(strncmp(ptrm-m-len_attribute+1, "attribute", len_attribute)==0){
+    						memmove(ptr_uint[n], "$$$$", 4);
+    						//ptr_uint_[num_uint_]=ptr_uint[n];
+    						num_uint_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='m' && *(ptrm-m)=='p'){
+					if(*(ptrm-m-len_mediump)==' '){
+    					if(strncmp(ptrm-m-len_mediump+1, "mediump", len_mediump)==0){
+    						memmove(ptr_uint[n], "####", 4);
+    						//ptr_uint_[num_uint_]=ptr_uint[n];
+    						num_uint_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='h' && *(ptrm-m)=='p'){
+					if(*(ptrm-m-len_highp)==' '){
+    					if(strncmp(ptrm-m-len_highp+1, "highp", len_highp)==0){
+    						memmove(ptr_uint[n], "####", 4);
+    						//ptr_uint_[num_uint_]=ptr_uint[n];
+    						num_uint_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='w' && *(ptrm-m)=='p'){
+					if(*(ptrm-m-len_lowp)==' '){
+    					if(strncmp(ptrm-m-len_lowp+1, "lowp", len_lowp)==0){
+    						memmove(ptr_uint[n], "####", 4);
+    						//ptr_uint_[num_uint_]=ptr_uint[n];
+    						num_uint_++;
+    					}
+    				}
+				}
+			}
+		}
+		if(*(ptr_uint[n])!='#' && *(ptr_uint[n])!='$'){
+			*(ptr_uint[n]) = 'u';
+		}
+	}
+	// uvecn
+	int len_uvec = strlen("uvec");
+	len_s_to_m = 0;
+	int num_uvec = 0;
+	int num_uvec_ = 0;
+	char **ptr_uvec = (char **)malloc( ((int)(lenS/len_uvec)+1)*sizeof(char*) );
+	//char **ptr_uvec_ = (char **)malloc( ((int)(lenS/len_uvec)+1)*sizeof(char*) );
+	pot = find("uvec", "uvec", source, ptr_uvec, &num_uvec);
+	ptrm = NULL;
+	for(int n=0; n<num_uvec; n++){
+		if( !(*(ptr_uvec[n]+4)>='2' && *(ptr_uvec[n]+4)<='4') ){				// Check if it is vec2/3/4.
+			memmove(ptr_uvec[n], ">>>>", 4);
+			ptr_uvec[n]=NULL;
+			continue;
+		}
+		ptrm = ptr_uvec[n];
+		*ptrm = '\0';
+		len_s_to_m = ptrm - *source;
+		for(int m=0; m<len_s_to_m; m++){
+			if(m==0){continue;}
+			if(*(ptrm-m)=='\n'){break;}
+			if(*(ptrm-m)==' '){						// Check backwards from "uvec" position to see if the string has "uniform" and "attribute", and make sure the path is full of spaces ' '.
+				continue;
+			}else{
+				if(*(ptrm-m-1)=='r' && *(ptrm-m)=='m'){				// First, fuzzy judgment is carried out to reduce the consumption caused by the string comparison function.
+					if(*(ptrm-m-len_uniform)=='\n' || *(ptrm-m-len_uniform)==';' || *(ptrm-m-len_uniform)==' '){
+    					if(strncmp(ptrm-m-len_uniform+1, "uniform", len_uniform)==0){
+    						memmove(ptr_uvec[n], ">>>>", 4);
+    						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
+    						num_uvec_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='t' && *(ptrm-m)=='e'){
+					if(*(ptrm-m-len_attribute)=='\n' || *(ptrm-m-len_attribute)==';' || *(ptrm-m-len_attribute)==' '){
+    					if(strncmp(ptrm-m-len_attribute+1, "attribute", len_attribute)==0){
+    						memmove(ptr_uvec[n], "$$$$$", 5);
+    						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
+    						num_uvec_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='m' && *(ptrm-m)=='p'){
+					if(*(ptrm-m-len_mediump)==' '){
+    					if(strncmp(ptrm-m-len_mediump+1, "mediump", len_mediump)==0){
+    						memmove(ptr_uvec[n], ">>>>", 4);
+    						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
+    						num_uvec_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='h' && *(ptrm-m)=='p'){
+					if(*(ptrm-m-len_highp)==' '){
+    					if(strncmp(ptrm-m-len_highp+1, "highp", len_highp)==0){
+    						memmove(ptr_uvec[n], ">>>>", 4);
+    						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
+    						num_uvec_++;
+    					}
+    				}
+				}
+				if(*(ptrm-m-1)=='w' && *(ptrm-m)=='p'){
+					if(*(ptrm-m-len_lowp)==' '){
+    					if(strncmp(ptrm-m-len_lowp+1, "lowp", len_lowp)==0){
+    						memmove(ptr_uvec[n], ">>>>", 4);
+    						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
+    						num_uvec_++;
+    					}
+    				}
+				}
+			}
+		}
+		if(*(ptr_uvec[n])!='>' && *(ptr_uvec[n])!='$'){
+			*(ptr_uvec[n]) = 'u';
+		}
+	}
+					Printf(" num_uint_ = %d ", num_uint_);
+					Printf(" num_uvec_ = %d ", num_uvec_);
+	
+	pot = replace("uint", "float", source);				// Replace (any) "int" with a "float".
+	pot = replace("uvec", "vec", source);
+	
+	pot = replace(">>>>", "uvec", source);					// Replace previously ignored "###"(int) back to "int".
+	pot = replace("####", "uint", source);
+	
+	pot = replace("$$$$$", "uvec4", source);				// GL3.0 support attribute uint/uvec2/3/4, but GLES3.0 only support attribute uvec4.
+	pot = replace("$$$$", "uvec4", source);				// GL3.0 support attribute uint/uvec2/3/4, but GLES3.0 only support attribute uvec4.
+	
+	free(ptr_uint);
+	//free(ptr_uint_);
+	free(ptr_uvec);
+	//free(ptr_uvec_);
+	
 	// int
 	int len_int = strlen("int");
-	int len_s_to_m = 0;
+	len_s_to_m = 0;
 	int num_int = 0;
 	int num_int_ = 0;
 	char **ptr_int = (char **)malloc( ((int)(lenS/len_int)+1)*sizeof(char*) );
 	//char **ptr_int_ = (char **)malloc( ((int)(lenS/len_int)+1)*sizeof(char*) );
 	pot = find("int", "int", source, ptr_int, &num_int);
-	char *ptrm = NULL;
+	ptrm = NULL;
 	for(int n=0; n<num_int; n++){
 		ptrm = ptr_int[n];
 		*ptrm = '\0';
@@ -387,7 +564,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				if(*(ptrm-m-1)=='t' && *(ptrm-m)=='e'){
 					if(*(ptrm-m-len_attribute)=='\n' || *(ptrm-m-len_attribute)==';' || *(ptrm-m-len_attribute)==' '){
     					if(strncmp(ptrm-m-len_attribute+1, "attribute", len_attribute)==0){
-    						memmove(ptr_int[n], "###", 3);
+    						memmove(ptr_int[n], "$$$", 3);
     						//ptr_int_[num_int_]=ptr_int[n];
     						num_int_++;
     					}
@@ -422,7 +599,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				}
 			}
 		}
-		if(*(ptr_int[n])!='#'){
+		if(*(ptr_int[n])!='#' && *(ptr_int[n])!='$'){
 			*(ptr_int[n]) = 'i';
 		}
 	}
@@ -437,7 +614,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	ptrm = NULL;
 	for(int n=0; n<num_ivec; n++){
 		if( !(*(ptr_ivec[n]+4)>='2' && *(ptr_ivec[n]+4)<='4') ){				// Check if it is vec2/3/4.
-			memmove(ptr_ivec[n], "####", 4);
+			memmove(ptr_ivec[n], ">>>>", 4);
 			ptr_ivec[n]=NULL;
 			continue;
 		}
@@ -453,7 +630,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				if(*(ptrm-m-1)=='r' && *(ptrm-m)=='m'){				// First, fuzzy judgment is carried out to reduce the consumption caused by the string comparison function.
 					if(*(ptrm-m-len_uniform)=='\n' || *(ptrm-m-len_uniform)==';' || *(ptrm-m-len_uniform)==' '){
     					if(strncmp(ptrm-m-len_uniform+1, "uniform", len_uniform)==0){
-    						memmove(ptr_ivec[n], "####", 4);
+    						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
     					}
@@ -462,7 +639,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				if(*(ptrm-m-1)=='t' && *(ptrm-m)=='e'){
 					if(*(ptrm-m-len_attribute)=='\n' || *(ptrm-m-len_attribute)==';' || *(ptrm-m-len_attribute)==' '){
     					if(strncmp(ptrm-m-len_attribute+1, "attribute", len_attribute)==0){
-    						memmove(ptr_ivec[n], "####", 4);
+    						memmove(ptr_ivec[n], "$$$$$", 5);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
     					}
@@ -471,7 +648,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				if(*(ptrm-m-1)=='m' && *(ptrm-m)=='p'){
 					if(*(ptrm-m-len_mediump)==' '){
     					if(strncmp(ptrm-m-len_mediump+1, "mediump", len_mediump)==0){
-    						memmove(ptr_ivec[n], "####", 4);
+    						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
     					}
@@ -480,7 +657,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				if(*(ptrm-m-1)=='h' && *(ptrm-m)=='p'){
 					if(*(ptrm-m-len_highp)==' '){
     					if(strncmp(ptrm-m-len_highp+1, "highp", len_highp)==0){
-    						memmove(ptr_ivec[n], "####", 4);
+    						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
     					}
@@ -489,7 +666,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				if(*(ptrm-m-1)=='w' && *(ptrm-m)=='p'){
 					if(*(ptrm-m-len_lowp)==' '){
     					if(strncmp(ptrm-m-len_lowp+1, "lowp", len_lowp)==0){
-    						memmove(ptr_ivec[n], "####", 4);
+    						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
     					}
@@ -497,32 +674,28 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 				}
 			}
 		}
-		if(*(ptr_ivec[n])!='#'){
+		if(*(ptr_ivec[n])!='>' && *(ptr_ivec[n])!='$'){
 			*(ptr_ivec[n]) = 'i';
 		}
 	}
 					Printf(" num_int_ = %d ", num_int_);
 					Printf(" num_ivec_ = %d ", num_ivec_);
 	
-	pot = replace("int", "float", source);//				Printf("!", __LINE__);				// Replace (any) "int" with a "float".
-	pot = replace("ivec", "vec", source);//				Printf("!", __LINE__);
+	pot = replace("int", "float", source);				// Replace (any) "int" with a "float".
+	pot = replace("ivec", "vec", source);
 	
-	pot = replace("####", "ivec", source);//				Printf("!", __LINE__);					// Replace previously ignored "###"(int) back to "int".
-	pot = replace("###", "int", source);//				Printf("!", __LINE__);
+	pot = replace(">>>>", "ivec", source);					// Replace previously ignored "###"(int) back to "int".
+	pot = replace("###", "int", source);
 	
-	free(ptr_int);//				Printf(" free = %p ", ptr_int);
-	//free(ptr_int_);//				Printf("!", __LINE__);
-	free(ptr_ivec);//				Printf(" free = %p ", ptr_ivec);
-	//free(ptr_ivec_);//				Printf("!", __LINE__);
+	pot = replace("$$$$$", "ivec4", source);				// GL3.0 support attribute int/ivec2/3/4, but GLES3.0 only support attribute ivec4.
+	pot = replace("$$$", "ivec4", source);				// so we need a converter.
+	
+	free(ptr_int);
+	//free(ptr_int_);
+	free(ptr_ivec);
+	//free(ptr_ivec_);
 	
 	
-	// >>>> uniform
-	cut_in_constructor("uniform", source);//				Printf("!", __LINE__);
-					Printf(" vsh = %d", vsh);
-	// >>>> attribute
-	if(vsh){
-		cut_in_constructor("attribute", source);//				Printf("!", __LINE__);
-	}
 	//				Printf("&&&&\nEnd %d \n&&&&", __LINE__);
 	return;
 }
@@ -549,6 +722,26 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
 	char ** arr_name = (char **)malloc(256*sizeof(char*));
 	char ** arr_name_ = (char **)malloc(256*sizeof(char*));
 	int arr_name_len[256];
+	// >>>> constructor
+	char * constructors_uniform[4] = {				// int/ivec2/3/4 >> float/vec2/3/4
+		" float %s { return float(%s); }\n",
+		" vec2 %s { return vec2(float(%s.x), float(%s.y)); }\n",
+		" vec3 %s { return vec3(float(%s.x), float(%s.y), float(%s.z)); }\n",
+		" vec4 %s { return vec4(float(%s.x), float(%s.y), float(%s.z), float(%s.w)); }\n"
+	};																// API			shader
+	char * constructors_attribute[4] = {				// int/ivec2/3/4 >> ivec4 >> float/vec2/3/4
+		" float %s { return float(%s.x); }\n",
+		" vec2 %s { return vec2(float(%s.x), float(%s.y)); }\n",
+		" vec3 %s { return vec3(float(%s.x), float(%s.y), float(%s.z)); }\n",
+		" vec4 %s { return vec4(float(%s.x), float(%s.y), float(%s.z), float(%s.w)); }\n"
+	};
+	char ** constructors_;
+	if(strncmp(A, "uniform", 7)==0){
+		constructors_=constructors_uniform;
+	}else{
+		constructors_=constructors_attribute;
+	}
+	
 	// >>>> uniform
 	int len_uniform = strlen(A);
 	int num_uniform = (int)(lenS/len_uniform*0.4);
@@ -571,12 +764,12 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
 			if(ptr_u[1]=='i'){
 				if(ptr_u[2]=='n'){			// int name
 					// Collect variable names
-					ptr_u += 5;
+					ptr_u += 4;
 					char * ptr_name = ptr_u;
 					while(*ptr_name==' ' || *ptr_name=='\n'){
 						ptr_name++;
 					}
-					int ptr_name_offset = ptr_name - *source;				// Because the source location is moved after the replace call, the pointer offset value is calculated in advance.
+					//int ptr_name_offset = ptr_name - *source;				// Because the source location is moved after the replace call, the pointer offset value is calculated in advance.
 					int name_len = len_name(ptr_name);
 					arr_name_len[num_constructor] = name_len;
 					char * name = (char *)malloc(name_len+1);
@@ -587,17 +780,20 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
 					memmove(name_+name_len, "_vgpu(void)", 11);
 					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
 					// Inserts a type constructor at the declaration of the variable name
-					char * constructor = "float %s { return float(%s); } \n ";				// A type conversion constructor.
+					char * constructor = constructors_[0];				// A type conversion constructor.
 					int len_constructor = snprintf(NULL, 0, constructor, name_, name);				Printf(" \n len_constructor = %d ", len_constructor);
+					len_constructor++;
 					char * constructor_ = (char *)malloc(len_constructor+1);//				Printf(" constructor_ = %p ", constructor_);
 					pot = snprintf(constructor_, len_constructor, constructor, name_, name);
 					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
 					ptr_constructor[num_constructor] = constructor_;//				Printf("!", __LINE__);				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
-					ptr_name = *source + ptr_name_offset;				// Make the position of ptr_name in the new source the same as that of the original source.
-					while(*ptr_name != '\n'){
-						ptr_name++;//				Printf("!", __LINE__);
+					//ptr_name = *source + ptr_name_offset;				// Make the position of ptr_name in the new source the same as that of the original source.
+					int x = 0;
+					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+						x++;//				Printf("!", __LINE__);
 					}
-					ptr_name++;
+					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
 					ptr_cut_in[num_constructor] = ptr_name;//				Printf(" ptr_name = %p ", ptr_name);					// Stores the location of the constructor to be inserted.
 					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
 					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);
@@ -607,12 +803,12 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
 				if(ptr_u[2]=='v'){//				Printf(" ivec !", __LINE__);
 					if(ptr_u[5]=='2'){//				Printf(" ivec2 !", __LINE__);			// ivec2
 						// Collect variable names
-    					ptr_u += 7;
+    					ptr_u += 6;
     					char * ptr_name = ptr_u;
     					while(*ptr_name==' ' || *ptr_name=='\n'){
     						ptr_name++;
     					}
-    					int ptr_name_offset = ptr_name - *source;
+    					//int ptr_name_offset = ptr_name - *source;
     					int name_len = len_name(ptr_name);
     					arr_name_len[num_constructor] = name_len;
     					char * name = (char *)malloc(name_len+1);
@@ -623,17 +819,20 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
     					memmove(name_+name_len, "_vgpu(void)", 11);
     					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
     					// Inserts a type constructor at the declaration of the variable name
-    					char * constructor = "vec2 %s { return vec2(float(%s.x), float(%s.y)); } \n ";				// A type conversion constructor.
+    					char * constructor = constructors_[1];				// A type conversion constructor.
     					int len_constructor = snprintf(NULL, 0, constructor, name_, name, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
     					char * constructor_ = (char *)malloc(len_constructor+1);
     					pot = snprintf(constructor_, len_constructor, constructor, name_, name, name);
     					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
     					ptr_constructor[num_constructor] = constructor_;				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
-    					ptr_name = *source + ptr_name_offset;
-    					while(*ptr_name != '\n'){
-    						ptr_name++;
+    					//ptr_name = *source + ptr_name_offset;
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;
     					}
-    					ptr_name++;
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
     					ptr_cut_in[num_constructor] = ptr_name;					// Stores the location of the constructor to be inserted.
     					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
     					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);
@@ -642,12 +841,12 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
     				}
 					if(ptr_u[5]=='3'){			// ivec3
 						// Collect variable names
-    					ptr_u += 7;
+    					ptr_u += 6;
     					char * ptr_name = ptr_u;
     					while(*ptr_name==' ' || *ptr_name=='\n'){
     						ptr_name++;
     					}
-    					int ptr_name_offset = ptr_name - *source;
+    					//int ptr_name_offset = ptr_name - *source;
     					int name_len = len_name(ptr_name);
     					arr_name_len[num_constructor] = name_len;
     					char * name = (char *)malloc(name_len+1);
@@ -658,17 +857,20 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
     					memmove(name_+name_len, "_vgpu(void)", 11);
     					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
     					// Inserts a type constructor at the declaration of the variable name
-    					char * constructor = "vec3 %s { return vec3(float(%s.x), float(%s.y), float(%s.z)); } \n ";				// A type conversion constructor.
+    					char * constructor = constructors_[2];				// A type conversion constructor.
     					int len_constructor = snprintf(NULL, 0, constructor, name_, name, name, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
     					char * constructor_ = (char *)malloc(len_constructor+1);
     					pot = snprintf(constructor_, len_constructor, constructor, name_, name, name, name);
     					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
     					ptr_constructor[num_constructor] = constructor_;				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
-    					ptr_name = *source + ptr_name_offset;
-    					while(*ptr_name != '\n'){
-    						ptr_name++;
+    					//ptr_name = *source + ptr_name_offset;
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;
     					}
-    					ptr_name++;
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
     					ptr_cut_in[num_constructor] = ptr_name;					// Stores the location of the constructor to be inserted.
     					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
     					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);
@@ -677,12 +879,12 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
 					}
 					if(ptr_u[5]=='4'){			// ivec4
 						// Collect variable names
-    					ptr_u += 7;
+    					ptr_u += 6;
     					char * ptr_name = ptr_u;
     					while(*ptr_name==' ' || *ptr_name=='\n'){
     						ptr_name++;
     					}
-    					int ptr_name_offset = ptr_name - *source;
+    					//int ptr_name_offset = ptr_name - *source;
     					int name_len = len_name(ptr_name);
     					arr_name_len[num_constructor] = name_len;
     					char * name = (char *)malloc(name_len+1);
@@ -693,17 +895,181 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
     					memmove(name_+name_len, "_vgpu(void)", 11);
     					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
     					// Inserts a type constructor at the declaration of the variable name
-    					char * constructor = "vec4 %s { return vec4(float(%s.x), float(%s.y), float(%s.z), float(%s.w)); } \n ";				// A type conversion constructor.
+    					char * constructor = constructors_[3];				// A type conversion constructor.
     					int len_constructor = snprintf(NULL, 0, constructor, name_, name, name, name, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
     					char * constructor_ = (char *)malloc(len_constructor+1);
     					pot = snprintf(constructor_, len_constructor, constructor, name_, name, name, name, name);
     					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
     					ptr_constructor[num_constructor] = constructor_;				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
-    					ptr_name = *source + ptr_name_offset;
-    					while(*ptr_name != '\n'){
+    					//ptr_name = *source + ptr_name_offset;
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;
+    					}
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
+    					ptr_cut_in[num_constructor] = ptr_name;					// Stores the location of the constructor to be inserted.
+    					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
+    					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);						
+						num_constructor++;
+						continue;
+					}
+					continue;
+    			}
+				continue;
+			}
+			if(ptr_u[1]=='u'){
+				if(ptr_u[2]=='i'){
+    				if(ptr_u[3]=='n'){			// uint name
+    					// Collect variable names
+    					ptr_u += 5;
+    					char * ptr_name = ptr_u;
+    					while(*ptr_name==' ' || *ptr_name=='\n'){
     						ptr_name++;
     					}
-    					ptr_name++;
+    					//int ptr_name_offset = ptr_name - *source;				// Because the source location is moved after the replace call, the pointer offset value is calculated in advance.
+    					int name_len = len_name(ptr_name);
+    					arr_name_len[num_constructor] = name_len;
+    					char * name = (char *)malloc(name_len+1);
+    					memmove(name, ptr_name, name_len);
+    					name[name_len]='\0';
+    					char * name_ = (char *)malloc(name_len+12);
+    					memmove(name_, ptr_name, name_len);
+    					memmove(name_+name_len, "_vgpu(void)", 11);
+    					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
+    					// Inserts a type constructor at the declaration of the variable name
+    					char * constructor = constructors_[0];				// A type conversion constructor.
+    					int len_constructor = snprintf(NULL, 0, constructor, name_, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
+    					char * constructor_ = (char *)malloc(len_constructor+1);//				Printf(" constructor_ = %p ", constructor_);
+    					pot = snprintf(constructor_, len_constructor, constructor, name_, name);
+    					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
+    					ptr_constructor[num_constructor] = constructor_;//				Printf("!", __LINE__);				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
+    					//ptr_name = *source + ptr_name_offset;				// Make the position of ptr_name in the new source the same as that of the original source.
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;//				Printf("!", __LINE__);
+    					}
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
+    					ptr_cut_in[num_constructor] = ptr_name;//				Printf(" ptr_name = %p ", ptr_name);					// Stores the location of the constructor to be inserted.
+    					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
+    					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);
+    					num_constructor++;
+    					continue;
+    				}
+    				continue;
+    			}
+				if(ptr_u[2]=='v'){
+					if(ptr_u[5]=='2'){			// uvec2
+						// Collect variable names
+    					ptr_u += 6;
+    					char * ptr_name = ptr_u;
+    					while(*ptr_name==' ' || *ptr_name=='\n'){
+    						ptr_name++;
+    					}
+    					//int ptr_name_offset = ptr_name - *source;
+    					int name_len = len_name(ptr_name);
+    					arr_name_len[num_constructor] = name_len;
+    					char * name = (char *)malloc(name_len+1);
+    					memmove(name, ptr_name, name_len);
+    					name[name_len]='\0';
+    					char * name_ = (char *)malloc(name_len+12);
+    					memmove(name_, ptr_name, name_len);
+    					memmove(name_+name_len, "_vgpu(void)", 11);
+    					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
+    					// Inserts a type constructor at the declaration of the variable name
+    					char * constructor = constructors_[1];				// A type conversion constructor.
+    					int len_constructor = snprintf(NULL, 0, constructor, name_, name, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
+    					char * constructor_ = (char *)malloc(len_constructor+1);
+    					pot = snprintf(constructor_, len_constructor, constructor, name_, name, name);
+    					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
+    					ptr_constructor[num_constructor] = constructor_;				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
+    					//ptr_name = *source + ptr_name_offset;
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;
+    					}
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
+    					ptr_cut_in[num_constructor] = ptr_name;					// Stores the location of the constructor to be inserted.
+    					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
+    					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);
+    					num_constructor++;
+    					continue;
+    				}
+					if(ptr_u[5]=='3'){			// uvec3
+						// Collect variable names
+    					ptr_u += 6;
+    					char * ptr_name = ptr_u;
+    					while(*ptr_name==' ' || *ptr_name=='\n'){
+    						ptr_name++;
+    					}
+    					//int ptr_name_offset = ptr_name - *source;
+    					int name_len = len_name(ptr_name);
+    					arr_name_len[num_constructor] = name_len;
+    					char * name = (char *)malloc(name_len+1);
+    					memmove(name, ptr_name, name_len);
+    					name[name_len]='\0';
+    					char * name_ = (char *)malloc(name_len+12);
+    					memmove(name_, ptr_name, name_len);
+    					memmove(name_+name_len, "_vgpu(void)", 11);
+    					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
+    					// Inserts a type constructor at the declaration of the variable name
+    					char * constructor = constructors_[2];				// A type conversion constructor.
+    					int len_constructor = snprintf(NULL, 0, constructor, name_, name, name, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
+    					char * constructor_ = (char *)malloc(len_constructor+1);
+    					pot = snprintf(constructor_, len_constructor, constructor, name_, name, name, name);
+    					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
+    					ptr_constructor[num_constructor] = constructor_;				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
+    					//ptr_name = *source + ptr_name_offset;
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;
+    					}
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
+    					ptr_cut_in[num_constructor] = ptr_name;					// Stores the location of the constructor to be inserted.
+    					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
+    					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);
+						num_constructor++;
+						continue;
+					}
+					if(ptr_u[5]=='4'){			// uvec4
+						// Collect variable names
+    					ptr_u += 6;
+    					char * ptr_name = ptr_u;
+    					while(*ptr_name==' ' || *ptr_name=='\n'){
+    						ptr_name++;
+    					}
+    					//int ptr_name_offset = ptr_name - *source;
+    					int name_len = len_name(ptr_name);
+    					arr_name_len[num_constructor] = name_len;
+    					char * name = (char *)malloc(name_len+1);
+    					memmove(name, ptr_name, name_len);
+    					name[name_len]='\0';
+    					char * name_ = (char *)malloc(name_len+12);
+    					memmove(name_, ptr_name, name_len);
+    					memmove(name_+name_len, "_vgpu(void)", 11);
+    					name_[name_len+11]='\0';				Printf(" \n name_ >>>>\n%s\n>>>> \n", name_);
+    					// Inserts a type constructor at the declaration of the variable name
+    					char * constructor = constructors_[3];				// A type conversion constructor.
+    					int len_constructor = snprintf(NULL, 0, constructor, name_, name, name, name, name);				Printf(" \n len_constructor = %d ", len_constructor);
+    					len_constructor++;
+    					char * constructor_ = (char *)malloc(len_constructor+1);
+    					pot = snprintf(constructor_, len_constructor, constructor, name_, name, name, name, name);
+    					constructor_[len_constructor]='\0';				Printf(" \n constructor_ >>>>\n%s\n>>>> \n", constructor_);
+    					ptr_constructor[num_constructor] = constructor_;				// Here, the constructor pointers are stored in an array of pointers, which are inserted at one time after all the constructors have been created.
+    					//ptr_name = *source + ptr_name_offset;
+    					int x = 0;
+    					while(ptr_name[x] != ';' && ptr_name[x] != '\0'){
+    						x++;
+    					}
+    					if(ptr_name[x] == ';'){ x++; ptr_name += x; }
+    					if(ptr_name[x] == '\0'){ ptr_name += name_len; }
     					ptr_cut_in[num_constructor] = ptr_name;					// Stores the location of the constructor to be inserted.
     					arr_name[num_constructor]=name;//				Printf(" free = %p ", name);
     					arr_name_[num_constructor]=name_;//				Printf(" free = %p ", name_);						
@@ -727,6 +1093,7 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
     	char * name = NULL;
     	lenS = strlen(*source);
     	for(int n=0; n<num_constructor; n++){
+    		if(arr_name_len[n]==0){continue;}
     		char * aux = (char *)malloc(arr_name_len[n]+1);
     		for(int x=0; x<arr_name_len[n]; x++){
 				aux[x]='$';
@@ -752,22 +1119,20 @@ void cut_in_constructor(char *A, char **source){//				Printf("&&&&\nStart %d \n&
         		name -= arr_name_len[n];
         	}
         	int vec_num = 2;									//constructor type
-        	if( *(ptr_constructor[n])=='f' ){ vec_num += 0; }	//float
-        	if( *(ptr_constructor[n]+3)=='2' ){ vec_num += 1; }	//vec2
-        	if( *(ptr_constructor[n]+3)=='3' ){ vec_num += 2; }	//vec3
-        	if( *(ptr_constructor[n]+3)=='4' ){ vec_num += 3; }	//vec4
+        	if( *(ptr_constructor[n]+1)=='f' ){ vec_num += 0; }	//float
+        	if( *(ptr_constructor[n]+4)=='2' ){ vec_num += 1; }	//vec2
+        	if( *(ptr_constructor[n]+4)=='3' ){ vec_num += 2; }	//vec3
+        	if( *(ptr_constructor[n]+4)=='4' ){ vec_num += 3; }	//vec4
         	pot = replace(arr_name[n], arr_name_[n], source);								//  Replace the variable names to make the constructor work for them.
         	pot = replace_common(arr_name_[n], arr_name[n], source, vec_num);				// Replace the variable name at the declaration and the constructor with original one.
         	pot = replace(aux, arr_name[n], source);
         	lenS += num_name*(strlen(arr_name_[n])-arr_name_len[n]);
-        	free(arr_name[n]);
-        	free(arr_name_[n]);
         	free(aux);
         }
         for(int m=0; m<num_constructor; m++){
-    		if(ptr_constructor[m] != NULL){
-    			free(ptr_constructor[m]);//				Printf(" ptr_constructor[%d] = %p ", m, ptr_constructor[m]);
-    		}
+    		free(arr_name[m]);
+        	free(arr_name_[m]);
+    		free(ptr_constructor[m]);//				Printf(" ptr_constructor[%d] = %p ", m, ptr_constructor[m]);
     	}
     }
     free(ptr_constructor);//				Printf(" free ptr_constructor %p ", ptr_constructor);
@@ -905,12 +1270,120 @@ void func_name_conv(char *A, char **source){//				Printf("&&&&\nStart %d \n&&&&"
 
 
 void fix_const(char **source){
+/*	int lenS = strlen(*source);
+	char * ptrS = *source;
+	for(int n=0; n<lenS; n++){
+	
+	
+	
+	}*/
+		
+	
+	
+	
 	return;
 }
 
 void skip_block(char **source){
 	return;
 }
+
+
+void in_to_attribute(char **source){
+	int pot;
+	int lenS = strlen(*source);
+	char * ptr = *source;
+	int is_space = 1;
+	for(int n=0; n<lenS; n++){				// find "in "
+		if(ptr[n]=='i'){
+			if(ptr[n+1]=='n'){
+				if(ptr[n+2]==' '){
+					for(int m=0; m<=n; m++){
+						if(m==0){continue;}
+						if(ptr[n-m]==' ' || ptr[n-m]=='\n'){
+							continue;
+						}else{
+							is_space = 0;						// (const in
+							if(ptr[n-m]==',' || ptr[n-m]=='(' || ptr[n-m]=='t'){				// Determines whether "in" is used to modify a function parameter.
+								break;								// If so, ignore.
+							}else{
+								memmove(ptr+n, "$$", 2);		// If not, mark it and it will be replaced with "attribute".
+							}
+						}
+					}
+					if(is_space){
+						memmove(ptr+n, "$$", 2);
+					}
+					continue;
+				}
+				continue;
+			}
+			continue;
+		}
+		continue;
+	}
+	pot = replace("$$", "attribute", source);
+	
+	return;
+}
+
+void fix_layout(char **source){
+	int pot;
+	int len_layout = strlen("layout");
+	int len_location = strlen("location");
+	int lenS = strlen(*source);
+	int num_layout = 0;
+	char ** ptr_layout_arr = (char **)malloc( ((int)(lenS/len_layout*0.3)+1)*sizeof(char*) );
+	pot = find("layout", "layout", source, ptr_layout_arr, &num_layout);
+	char * ptr;
+	for(int n=0; n<num_layout; n++){				// layout(location = 0.0) >> layout(location = 0)
+		ptr = ptr_layout_arr[n];
+		ptr += len_layout;
+		while(*ptr==' ' || *ptr=='\n'){
+			ptr++;
+		}
+		if(*ptr=='(')
+			ptr++;
+		else
+			continue;
+		while(*ptr==' ' || *ptr=='\n'){
+			ptr++;
+		}
+		if(*ptr=='l'){
+			if(strncmp(ptr, "location", len_location)==0){
+				ptr += len_location;
+			}else
+				continue;
+		}else
+			continue;
+		while(*ptr==' ' || *ptr=='\n'){
+			ptr++;
+		}
+		if(*ptr=='=')
+			ptr++;
+		else
+			continue;
+		while(*ptr==' ' || *ptr=='\n'){
+			ptr++;
+		}
+		if(*ptr>='0' && *ptr<='9'){
+			ptr++;
+			while(*ptr>='0' && *ptr<='9'){
+				ptr++;
+			}
+		}else
+			continue;
+		if(*ptr=='.'){
+			*ptr=' ';
+			*(ptr+1)=' ';
+		}
+		continue;
+	}
+	free(ptr_layout_arr);
+	
+	return;
+}
+		
 
 void add_marker(char **converted){// ##FIX_MARKER_VGPU##
 	int lenS = strlen(*converted);
