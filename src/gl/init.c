@@ -13,6 +13,7 @@
 #include "fpe_cache.h"
 #include "init.h"
 #include "envvars.h"
+#include "wrap/setenv.h"
 #if defined(__EMSCRIPTEN__) || defined(__APPLE__)
 #define NO_INIT_CONSTRUCTOR
 #endif
@@ -69,6 +70,10 @@ __attribute__((constructor))
 void initialize_gl4es() {
     // only init 1 time
     if(inited++) return;
+    
+    // custom environment variable
+    allSetEnv();
+    
     // default init of globals
     memset(&globals4es, 0, sizeof(globals4es));
     globals4es.mergelist = 1;
