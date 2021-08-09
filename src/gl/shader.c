@@ -295,12 +295,12 @@ void redoShader(GLuint shader, shaderconv_need_t *need) {
     // test, if no changes, no need to reconvert & recompile...
     if (memcmp(&glshader->need, need, sizeof(shaderconv_need_t))==0)
         return;
-    free(glshader->converted);
+    //free(glshader->converted);
     memcpy(&glshader->need, need, sizeof(shaderconv_need_t));
     //glshader->converted = ConvertShader(glshader->source, glshader->type==GL_VERTEX_SHADER?1:0, &glshader->need);
     // send source to GLES2 hardware if any
     
-    int len_source = strlen(glshader->source);
+    /*int len_source = strlen(glshader->source);
     char * source_ = (char *)malloc(len_source+1);
     memmove(source_, glshader->source, len_source);
     source_[len_source] = '\0';
@@ -308,7 +308,7 @@ void redoShader(GLuint shader, shaderconv_need_t *need) {
     free(source_);
     // recompile...
     gl4es_glCompileShader(glshader->id);
-    
+    */
 }
 
 void gl4es_glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) {

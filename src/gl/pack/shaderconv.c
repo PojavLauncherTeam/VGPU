@@ -198,10 +198,10 @@ static char _shadow2D[]=
 " ivec2 Size = textureSize(tex, 0);\n"
 " return texture(tex, P+offset/vec2(float(Size.x), float(Size.y)));\n"
 "}"
-"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset, float bias){\n"
+/*"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset, float bias){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return texture(tex, P+offset/vec2(float(Size.x), float(Size.y)), bias);\n"
-"}"
+"}"*/
 "vec2 textureSize_(sampler2D tex, float lod){\n"				// textureSize
 " ivec2 Size = textureSize(tex, int(lod));\n"
 " return vec2(float(Size.x), float(Size.y));\n"
@@ -213,17 +213,17 @@ static char _shadow2D[]=
 "vec4 textureGather_(sampler2D tex, vec2 P){\n"				// textureGather
 " return textureGather(tex, P);\n"
 "}"
-"vec4 textureGather_(sampler2D tex, vec2 P, float comp){\n"
+/*"vec4 textureGather_(sampler2D tex, vec2 P, float comp){\n"
 " return textureGather(tex, P, int(comp));\n"
-"}"
+"}"*/
 "vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)));\n"
 "}"
-"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset, float comp){\n"
+/*"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset, float comp){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)), int(comp));\n"
-"}"
+"}"*/
 /*"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, int level){\n"
 " return vec3(textureLod(shadow, coord, float(level)), 0.0, 0.0);\n"
 "}"*/
