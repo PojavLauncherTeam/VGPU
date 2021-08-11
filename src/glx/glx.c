@@ -38,6 +38,12 @@
 #include "utils.h"
 #include "../gl/envvars.h"
 
+#include <string.h>
+#include <stdio.h>
+#include <android/log.h>
+
+#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
+
 #ifndef AliasExport
 #define AliasExport(name)   __attribute__((alias(name))) __attribute__((visibility("default")))
 #endif

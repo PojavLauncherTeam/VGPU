@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 #include "load.h"
+#include "Initialization_.c"
 
 void load_all(void){
 	
@@ -390,6 +391,8 @@ void load_all(void){
 
 
 	dlclose(libGL);
+	
+	Initialization_();
 	
 }
 

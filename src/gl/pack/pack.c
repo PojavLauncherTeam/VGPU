@@ -16,8 +16,8 @@ int loaded = 0;
 
 #define _LOAD_GLES if(loaded == 0){load_all();loaded = 1;}
 
-//int count=0, count1=0;
-//int num = 500;
+//int count=0;
+//int num = 700;
 
 // GLuint glCreateShader( GLenum type )
 // {    _LOAD_GLES    
@@ -100,23 +100,40 @@ void glDrawBuffer (GLenum buf){    _LOAD_GLES
 }
 
 void glClear (GLbitfield mask){    _LOAD_GLES    
- gl4es_glClear (mask);
-
+ /*if(count%num==0){
+  Printf("////////glClear : %x  MaxDrawBuffers : %d ////////\n", (int)mask, MaxDrawBuffers);
+  if((mask&GL_COLOR_BUFFER_BIT)!=0){
+  	Printf("mask&GL_COLOR_BUFFER_BIT != 0");
+  }
+ }
+ count++;
+ if(count>50000000){
+  count=0;
+ }*/
+ 
+ if((mask&GL_COLOR_BUFFER_BIT)!=0){
+    _gles_glDrawBuffers(MaxDrawBuffers, (const GLenum *)Attachs);
+    for(int n=1; n<MaxDrawBuffers; n++){
+    	_gles_glClearBufferfv(GL_COLOR, n, (const float *)ClearColorValue);
+    }
+ }
+  _gles_glClear (mask);
+//====
 }
 
 void glClearColor (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha){    _LOAD_GLES    
- gl4es_glClearColor (red, green, blue, alpha);
-
+ _gles_glClearColor (red, green, blue, alpha);
+//====
 }
 
 void glClearStencil (GLint s){    _LOAD_GLES    
- gl4es_glClearStencil (s);
-
+ _gles_glClearStencil (s);
+//====
 }
 
 void glClearDepth (GLdouble depth){    _LOAD_GLES    
- gl4es_glClearDepth (depth);
-
+ _gles_glClearDepthf ((GLfloat)depth);
+//====pack
 }
 
 void glStencilMask (GLuint mask){    _LOAD_GLES    
@@ -227,7 +244,7 @@ void glGetIntegerv (GLenum pname, GLint *data){    _LOAD_GLES
 const GLubyte *glGetString (GLenum name){    _LOAD_GLES    
  
  if(name == GL_RENDERER){
-  return (const GLubyte *)"vgpu 1.3.4";
+  return (const GLubyte *)"vgpu 1.3.6";
  }
  if(name == GL_VERSION){
   return (const GLubyte *)"4.4";
@@ -1413,23 +1430,23 @@ void glGetTexParameterIuiv (GLenum target, GLenum pname, GLuint *params){    _LO
 }
 
 void glClearBufferiv (GLenum buffer, GLint drawbuffer, const GLint *value){    _LOAD_GLES    
- gl4es_glClearBufferiv (buffer, drawbuffer, value);
-
+ _gles_glClearBufferiv (buffer, drawbuffer, value);
+//====
 }
 
 void glClearBufferuiv (GLenum buffer, GLint drawbuffer, const GLuint *value){    _LOAD_GLES    
- gl4es_glClearBufferuiv (buffer, drawbuffer, value);
-
+ _gles_glClearBufferuiv (buffer, drawbuffer, value);
+//====
 }
 
 void glClearBufferfv (GLenum buffer, GLint drawbuffer, const GLfloat *value){    _LOAD_GLES    
- gl4es_glClearBufferfv (buffer, drawbuffer, value);
-
+ _gles_glClearBufferfv (buffer, drawbuffer, value);
+//====
 }
 
 void glClearBufferfi (GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil){    _LOAD_GLES    
- gl4es_glClearBufferfi (buffer, drawbuffer, depth, stencil);
-
+ _gles_glClearBufferfi (buffer, drawbuffer, depth, stencil);
+//====
 }
 
 const GLubyte *glGetStringi (GLenum name, GLuint index){    _LOAD_GLES    
@@ -1498,12 +1515,12 @@ void glFramebufferTexture1D (GLenum target, GLenum attachment, GLenum textarget,
 }
 
 void glFramebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level){    _LOAD_GLES    
-/* if(count1%num==0){
+/* if(count%num==0){
   Printf("////////FramebufferTexture2D attachment : %x  ////////\n", attachment);
  }
- count1++;
- if(count1>50000000){
-  count1=0;
+ count++;
+ if(count>50000000){
+  count=0;
  }
 */
  _gles_glFramebufferTexture2D (target, attachment, textarget, texture, level);
