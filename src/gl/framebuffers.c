@@ -1534,7 +1534,7 @@ void gl4es_glClearBufferiv(GLenum buffer, GLint drawbuffer, const GLint * value)
                 LOAD_GLES2(glDrawBuffers);
                 // select the buffer...
                 if(hardext.drawbuffers)
-                    gles_glDrawBuffers(1, &drawbuffer);
+                    gles_glDrawBuffers(1, (const GLenum *)&drawbuffer);
                 gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
                 // how to convert the value? Most FB will be 8bits / componant for now...
                 gl4es_glClearColor(value[0]/127.0f, value[1]/127.0f, value[2]/127.0f, value[3]/127.0f);
@@ -1579,7 +1579,7 @@ void gl4es_glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint * valu
                 LOAD_GLES2(glDrawBuffers);
                 // select the buffer...
                 if(hardext.drawbuffers)
-                    gles_glDrawBuffers(1, &drawbuffer);
+                    gles_glDrawBuffers(1, (const GLenum *)&drawbuffer);
                 gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
                 // how to convert the value? Most FB will be 8bits / componant for now...
                 gl4es_glClearColor(value[0]/255.0f, value[1]/255.0f, value[2]/255.0f, value[3]/255.0f);
@@ -1612,7 +1612,7 @@ void gl4es_glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat * valu
                 LOAD_GLES2(glDrawBuffers);
                 // select the buffer...
                 if(hardext.drawbuffers)
-                    gles_glDrawBuffers(1, &drawbuffer);
+                    gles_glDrawBuffers(1, (const GLenum *)&drawbuffer);
                 gl4es_glGetFloatv(GL_COLOR_CLEAR_VALUE, oldclear);
                 // how to convert the value? Most FB will be 8bits / componant for now...
                 gl4es_glClearColor(value[0], value[1], value[2], value[3]);
@@ -1763,7 +1763,7 @@ void glBlitFramebufferEXT(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GL
 // DrawBuffers
 //void glDrawBuffers(GLsizei n, const GLenum *bufs) AliasExport("gl4es_glDrawBuffers");
 void glDrawBuffersARB(GLsizei n, const GLenum *bufs) AliasExport("gl4es_glDrawBuffers");
-void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n, const GLenum *bufs) AliasExport("gl4es_glNamedFramebufferDrawBuffers");
+//void glNamedFramebufferDrawBuffers(GLuint framebuffer, GLsizei n, const GLenum *bufs) AliasExport("gl4es_glNamedFramebufferDrawBuffers");
 void glNamedFramebufferDrawBuffersEXT(GLuint framebuffer, GLsizei n, const GLenum *bufs) AliasExport("gl4es_glNamedFramebufferDrawBuffers");
 
 // ClearBuffer...
@@ -1773,12 +1773,12 @@ void glClearBufferuiv(GLenum buffer, GLint drawbuffer, const GLuint * value) Ali
 void glClearBufferfv(GLenum buffer, GLint drawbuffer, const GLfloat * value) AliasExport("gl4es_glClearBufferfv");
 void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) AliasExport("gl4es_glClearBufferfi");
 */
-
+/*
 void glClearNamedFramebufferiv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value) AliasExport("gl4es_glClearNamedFramebufferiv");
 void glClearNamedFramebufferuiv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value) AliasExport("gl4es_glClearNamedFramebufferuiv");
 void glClearNamedFramebufferfv(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value) AliasExport("gl4es_glClearNamedFramebufferfv");
 void glClearNamedFramebufferfi(GLuint framebuffer, GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) AliasExport("gl4es_glClearNamedFramebufferfi");
-
+*/
 void glClearNamedFramebufferivEXT(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLint *value) AliasExport("gl4es_glClearNamedFramebufferiv");
 void glClearNamedFramebufferuivEXT(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLuint *value) AliasExport("gl4es_glClearNamedFramebufferuiv");
 void glClearNamedFramebufferfvEXT(GLuint framebuffer, GLenum buffer, GLint drawbuffer, const GLfloat *value) AliasExport("gl4es_glClearNamedFramebufferfv");

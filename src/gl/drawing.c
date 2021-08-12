@@ -1369,7 +1369,7 @@ void gl4es_glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsize
         glDrawElementsCommon(mode, first, count, count, NULL, NULL, primcount);
     }
 }
-void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei primcount) AliasExport("gl4es_glDrawArraysInstanced");
+//void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei primcount) AliasExport("gl4es_glDrawArraysInstanced");
 void glDrawArraysInstancedARB(GLenum mode, GLint first, GLsizei count, GLsizei primcount) AliasExport("gl4es_glDrawArraysInstanced");
 
 void gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount) {
@@ -1469,7 +1469,7 @@ void gl4es_glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, cons
             free(sindices);
     }
 }
-void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount) AliasExport("gl4es_glDrawElementsInstanced");
+//void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount) AliasExport("gl4es_glDrawElementsInstanced");
 void glDrawElementsInstancedARB(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount) AliasExport("gl4es_glDrawElementsInstanced");
 
 void gl4es_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex) {
@@ -1566,5 +1566,5 @@ void gl4es_glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum 
         }
     }
 }
-void glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex) AliasExport("gl4es_glDrawElementsInstancedBaseVertex");
+//void glDrawElementsInstancedBaseVertex(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex) AliasExport("gl4es_glDrawElementsInstancedBaseVertex");
 void glDrawElementsInstancedBaseVertexARB(GLenum mode, GLsizei count, GLenum type, const void *indices, GLsizei primcount, GLint basevertex) AliasExport("gl4es_glDrawElementsInstancedBaseVertex");
