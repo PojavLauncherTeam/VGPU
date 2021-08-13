@@ -22,7 +22,8 @@ For GLSL150+(core), the converter now only has some simple conversions (it is no
 Other converters:
 (Based on simple contextual judgments)
 Supports assigning nonconst variables to const variables within a block. 
-Supports declaring array sizes with simple variables initialized to constants.
+not supported declaring array sizes with simple variables initialized to constants yet.
+The % mod operator is not yet supported (this causes MC1.17 to fail because shader uses %)
 
 
 About mipmap:
