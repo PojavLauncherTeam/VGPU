@@ -3,13 +3,14 @@
 #include <string.h>
 #include <stdlib.h>
 
+//#include "../../glx/hardext.h"
 #include "shaderconv.h"
 #include "shader.h"
 
-#include <android/log.h>
-#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
+//#include <android/log.h>
+//#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
 
-//#define Printf(...) printf(__VA_ARGS__)
+#define Printf(...) printf(__VA_ARGS__)
 
 /*#define Printf_ \
 		Printf("========NewConvertShader : \n"); \
@@ -29,8 +30,6 @@
         Printf("\n>>>>>>>>\n ");*/
 
 
-#define SHADOW 0x00
-#define TEXTURE 0x0f
 
 
 #define replace_gl_FragData(N)  \
@@ -54,21 +53,26 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	else
   		vsh = 0;
   	
-  	int cut_in_offset = strstr(*glshader_converted, "0 es") + 5 - *glshader_converted;//				Printf(" cut_in_offset = %d ", cut_in_offset);
-  	char * ptr_cut_in = *glshader_converted + cut_in_offset;
+	GLSLHeader(glshader_converted);
   	
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
-  	//pot = replace("const ", "", glshader_converted);
   	if(vsh){
   		in_to_attribute(glshader_converted);				// in >> attribute
   	}
-  	//add_marker(glshader_converted);
+  	add_marker(glshader_converted);
   	fix_const("const ", glshader_converted);
-  	pot = replace("#ext", "//#ext", glshader_converted);				// #extension
+  	//pot = replace("#ext", "//#ext", glshader_converted);				// #extension
   	
   	// >>>>fixed for GLSL3.x
   	fix_layout(glshader_converted);
+  	if(vsh){
+  		//pot = replace("gl_VertexID", "float(gl_VertexID)", glshader_converted);
+  		fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
+  	}else{
+  		//fix_int_build_in_variable("gl_VertexID", glshader_converted);
+  	}
+  	fix_mod(glshader_converted);
   	
   	// ======== Handling the first half of an implicit type conversion.
     //num_add_f(glshader_converted);
@@ -76,19 +80,39 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	int_to_float(glshader_converted, vsh);//				Printf("!", __LINE__);
 	// ======== Keyword
 	if(vsh){
-		/*
-		ptr_cut_in = *glshader_converted + cut_in_offset;
-		cut_in(ptr_cut_in, "#define attribute in\n", glshader_converted);//				Printf("!", __LINE__);
-		ptr_cut_in = *glshader_converted + cut_in_offset;
-		cut_in(ptr_cut_in, "#define varying out\n", glshader_converted);//				Printf("!", __LINE__);
-		*/
+		
 		pot = replace("attribute", "in", glshader_converted);//				Printf("!", __LINE__);
 		pot = replace("varying", "out", glshader_converted);
 	}else{
-		//ptr_cut_in = *glshader_converted + cut_in_offset;
-		//cut_in(ptr_cut_in, "#define varying in\n", glshader_converted);//				Printf("!", __LINE__);
 		pot = replace("varying", "in", glshader_converted);//				Printf("!", __LINE__);
 	}
+	
+	// ======== Built-in function
+	pot = replace("texture2D", "texture", glshader_converted);
+	//char * isshadow = strstr(*glshader_converted, "shadow");				printf("shadow = %p \n", isshadow);
+	//if(isshadow){
+	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
+	pot = replace("texelFetch", "texelFetch_", glshader_converted);
+	pot = replace("textureGather", "textureGather_", glshader_converted);	Printf("Calling %d ", __LINE__);
+	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	Printf("Calling %d ", __LINE__);
+	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+	//}
+	
+	int cut_in_offset;
+  	int isextension = find_extension(glshader_converted, &cut_in_offset);	Printf("Calling %d extension = %d ", __LINE__, isextension);
+  	if(isextension==0){
+  		char * ptr_offset = strstr(*glshader_converted, "0 es");//				Printf(" cut_in_offset = %d ", cut_in_offset);
+  		if(ptr_offset){
+  			cut_in_offset = ptr_offset + 5 - *glshader_converted;//				Printf(" cut_in_offset = %d ", cut_in_offset);
+  		}else{
+  			cut_in_offset = 0;
+  		}
+  	}
+  	char * ptr_cut_in = *glshader_converted + cut_in_offset;
+  	
+	func_build_in(glshader_converted, cut_in_offset, SHADOW);	Printf("Calling %d ", __LINE__);//				Printf("!", __LINE__);
+	Printf("Calling %d ", __LINE__);
+	
 	
 	// ======== Built-in variable
 	
@@ -119,30 +143,12 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	}
 	
 	
-	// ======== Built-in function
-	pot = replace("texture2D", "texture", glshader_converted);
-	//char * isshadow = strstr(*glshader_converted, "shadow");				printf("shadow = %p \n", isshadow);
-	//if(isshadow){
-	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
-	pot = replace("texelFetch", "texelFetch_", glshader_converted);
-	pot = replace("textureGather", "textureGather_", glshader_converted);
-	pot = replace("Offset", "Offset_", glshader_converted);
-	func_build_in(glshader_converted, cut_in_offset, SHADOW);//				Printf("!", __LINE__);
-	//}
-	
-	
-	func_name_conv("texture", glshader_converted);//				Printf("!", __LINE__);						// Prevent conflict between variable name and function name.
-	
-	
-	
-	//ptr_cut_in = *glshader_converted + cut_in_offset;
-	//cut_in(ptr_cut_in, "#define texture2DProj textureProj\n#define texture2DLod textureLod\n#define texture2D texture\n", glshader_converted);//				Printf("!", __LINE__);
-	
-	//pot = replace("texture2D", "texture", glshader_converted);
 	
 	// ======== Integer type compatibility
-	pot = replace("[", "[int(", glshader_converted);//				Printf("!", __LINE__);
-	pot = replace("]", ")]", glshader_converted);//				Printf("!", __LINE__);
+	variable_length_array(glshader_converted);
+	fix_array(glshader_converted);	Printf("Calling %d ", __LINE__);
+	//pot = replace("[", "[int(", glshader_converted);//				Printf("!", __LINE__);
+	//pot = replace("]", ")]", glshader_converted);//				Printf("!", __LINE__);
 	
 	// ======== some fix
 	fix_marker(glshader_converted);	
@@ -197,10 +203,10 @@ static char _shadow2D[]=
 " ivec2 Size = textureSize(tex, 0);\n"
 " return texture(tex, P+offset/vec2(float(Size.x), float(Size.y)));\n"
 "}"
-"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset, float bias){\n"
+/*"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset, float bias){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return texture(tex, P+offset/vec2(float(Size.x), float(Size.y)), bias);\n"
-"}"
+"}"*/
 "vec2 textureSize_(sampler2D tex, float lod){\n"				// textureSize
 " ivec2 Size = textureSize(tex, int(lod));\n"
 " return vec2(float(Size.x), float(Size.y));\n"
@@ -212,17 +218,17 @@ static char _shadow2D[]=
 "vec4 textureGather_(sampler2D tex, vec2 P){\n"				// textureGather
 " return textureGather(tex, P);\n"
 "}"
-"vec4 textureGather_(sampler2D tex, vec2 P, float comp){\n"
+/*"vec4 textureGather_(sampler2D tex, vec2 P, float comp){\n"
 " return textureGather(tex, P, int(comp));\n"
-"}"
+"}"*/
 "vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)));\n"
 "}"
-"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset, float comp){\n"
+/*"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset, float comp){\n"
 " ivec2 Size = textureSize(tex, 0);\n"
 " return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)), int(comp));\n"
-"}"
+"}"*/
 /*"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, int level){\n"
 " return vec3(textureLod(shadow, coord, float(level)), 0.0, 0.0);\n"
 "}"*/
@@ -249,6 +255,22 @@ void func_build_in(char **converted, int cut_in_offset, int type){//				Printf("
 }
 
 
+void GLSLHeader(char **source){
+/*	int pot;
+	if(hardext.glsl320es){
+  		pot = replace_common("#version 100", "#version 320 es", source, 1);
+  		return;
+  	}
+  	if(hardext.glsl310es){
+  		pot = replace_common("#version 100", "#version 310 es", source, 1);
+  		return;
+  	}
+  	if(hardext.glsl300es){
+  		pot = replace_common("#version 100", "#version 300 es", source, 1);
+  		return;
+  	}
+  	return;*/
+}
 
 
 void num_add_f(char **source){//				Printf("&&&&\nStart %d \n&&&&", __LINE__);
@@ -382,6 +404,13 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	char *ptrm = NULL;
 	for(int n=0; n<num_uint; n++){
 		ptrm = ptr_uint[n];
+		if(ptrm!=*source){
+			if(judge_name(ptrm-1)){
+				memmove(ptr_uint[n], "####", 4);
+				ptr_uint[n]=NULL;
+				continue;
+			}
+		}
 		*ptrm = '\0';
 		len_s_to_m = ptrm - *source;
 		for(int m=0; m<len_s_to_m; m++){
@@ -396,6 +425,8 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uint[n], "####", 4);
     						//ptr_uint_[num_uint_]=ptr_uint[n];
     						num_uint_++;
+    						break;
+    						break;
     					}
     				}
 				}
@@ -405,6 +436,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uint[n], "$$$$", 4);
     						//ptr_uint_[num_uint_]=ptr_uint[n];
     						num_uint_++;
+    						break;
     					}
     				}
 				}
@@ -414,6 +446,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uint[n], "####", 4);
     						//ptr_uint_[num_uint_]=ptr_uint[n];
     						num_uint_++;
+    						break;
     					}
     				}
 				}
@@ -423,6 +456,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uint[n], "####", 4);
     						//ptr_uint_[num_uint_]=ptr_uint[n];
     						num_uint_++;
+    						break;
     					}
     				}
 				}
@@ -432,6 +466,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uint[n], "####", 4);
     						//ptr_uint_[num_uint_]=ptr_uint[n];
     						num_uint_++;
+    						break;
     					}
     				}
 				}
@@ -451,12 +486,19 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	pot = find("uvec", "uvec", source, ptr_uvec, &num_uvec);
 	ptrm = NULL;
 	for(int n=0; n<num_uvec; n++){
-		if( !(*(ptr_uvec[n]+4)>='2' && *(ptr_uvec[n]+4)<='4') ){				// Check if it is vec2/3/4.
+		ptrm = ptr_uvec[n];
+		if(ptrm!=*source){
+			if(judge_name(ptrm-1)){
+				memmove(ptr_uvec[n], ">>>>", 4);
+				ptr_uvec[n]=NULL;
+				continue;
+			}
+		}
+		if( !(*(ptrm+4)>='2' && *(ptrm+4)<='4') ){				// Check if it is vec2/3/4.
 			memmove(ptr_uvec[n], ">>>>", 4);
 			ptr_uvec[n]=NULL;
 			continue;
 		}
-		ptrm = ptr_uvec[n];
 		*ptrm = '\0';
 		len_s_to_m = ptrm - *source;
 		for(int m=0; m<len_s_to_m; m++){
@@ -471,6 +513,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uvec[n], ">>>>", 4);
     						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
     						num_uvec_++;
+    						break;
     					}
     				}
 				}
@@ -480,6 +523,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uvec[n], "$$$$$", 5);
     						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
     						num_uvec_++;
+    						break;
     					}
     				}
 				}
@@ -489,6 +533,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uvec[n], ">>>>", 4);
     						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
     						num_uvec_++;
+    						break;
     					}
     				}
 				}
@@ -498,6 +543,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uvec[n], ">>>>", 4);
     						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
     						num_uvec_++;
+    						break;
     					}
     				}
 				}
@@ -507,6 +553,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_uvec[n], ">>>>", 4);
     						//ptr_uvec_[num_uvec_]=ptr_uvec[n];
     						num_uvec_++;
+    						break;
     					}
     				}
 				}
@@ -544,6 +591,13 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	ptrm = NULL;
 	for(int n=0; n<num_int; n++){
 		ptrm = ptr_int[n];
+		if(ptrm!=*source){
+			if(judge_name(ptrm-1)){
+				memmove(ptr_int[n], "###", 3);
+				ptr_int[n]=NULL;
+				continue;
+			}
+		}
 		*ptrm = '\0';
 		len_s_to_m = ptrm - *source;
 		for(int m=0; m<len_s_to_m; m++){
@@ -558,6 +612,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_int[n], "###", 3);
     						//ptr_int_[num_int_]=ptr_int[n];
     						num_int_++;
+    						break;
     					}
     				}
 				}
@@ -567,6 +622,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_int[n], "$$$", 3);
     						//ptr_int_[num_int_]=ptr_int[n];
     						num_int_++;
+    						break;
     					}
     				}
 				}
@@ -576,6 +632,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_int[n], "###", 3);
     						//ptr_int_[num_int_]=ptr_int[n];
     						num_int_++;
+    						break;
     					}
     				}
 				}
@@ -585,6 +642,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_int[n], "###", 3);
     						//ptr_int_[num_int_]=ptr_int[n];
     						num_int_++;
+    						break;
     					}
     				}
 				}
@@ -594,6 +652,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_int[n], "###", 3);
     						//ptr_int_[num_int_]=ptr_int[n];
     						num_int_++;
+    						break;
     					}
     				}
 				}
@@ -613,12 +672,19 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	pot = find("ivec", "ivec", source, ptr_ivec, &num_ivec);
 	ptrm = NULL;
 	for(int n=0; n<num_ivec; n++){
-		if( !(*(ptr_ivec[n]+4)>='2' && *(ptr_ivec[n]+4)<='4') ){				// Check if it is vec2/3/4.
+		ptrm = ptr_ivec[n];
+		if(ptrm!=*source){
+			if(judge_name(ptrm-1)){
+				memmove(ptr_ivec[n], ">>>>", 4);
+				ptr_ivec[n]=NULL;
+				continue;
+			}
+		}
+		if( !(*(ptrm+4)>='2' && *(ptrm+4)<='4') ){				// Check if it is vec2/3/4.
 			memmove(ptr_ivec[n], ">>>>", 4);
 			ptr_ivec[n]=NULL;
 			continue;
 		}
-		ptrm = ptr_ivec[n];
 		*ptrm = '\0';
 		len_s_to_m = ptrm - *source;
 		for(int m=0; m<len_s_to_m; m++){
@@ -633,6 +699,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
+    						break;
     					}
     				}
 				}
@@ -642,6 +709,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_ivec[n], "$$$$$", 5);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
+    						break;
     					}
     				}
 				}
@@ -651,6 +719,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
+    						break;
     					}
     				}
 				}
@@ -660,6 +729,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
+    						break;
     					}
     				}
 				}
@@ -669,6 +739,7 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
     						memmove(ptr_ivec[n], ">>>>", 4);
     						//ptr_ivec_[num_ivec_]=ptr_ivec[n];
     						num_ivec_++;
+    						break;
     					}
     				}
 				}
@@ -698,6 +769,14 @@ void int_to_float(char **source, int vsh){//				Printf("&&&&\nStart %d \n&&&&", 
 	
 	//				Printf("&&&&\nEnd %d \n&&&&", __LINE__);
 	return;
+}
+
+int judge_name(char *ptr){
+	int n = 0;
+	if( (ptr[n]>='a' && ptr[n]<='z') || (ptr[n]>='A' && ptr[n]<='Z') || (ptr[n]>='0' && ptr[n]<='9') || ptr[n]=='_' ){
+		n++;
+	}
+	return n;
 }
 
 int len_name(char *ptr){
@@ -1268,9 +1347,222 @@ void func_name_conv(char *A, char **source){//				Printf("&&&&\nStart %d \n&&&&"
 }
 
 
-void replace_with_space(char *ptr, int len){
+void replace_func_name(char *A, char *B, char **source, int mode){//				Printf("&&&&\nStart %d \n&&&&", __LINE__);
+	int pot = 0;
+	int count = 0;
+	int lenA = strlen(A);
+	int lenS = strlen(*source);
+	char ** ptrM = (char **)malloc( ((int)(lenS/lenA*0.4)+1)*sizeof(char *) );
+	pot = find(A, A, source, ptrM, &count);
+	
+	//char * conv = B;
+	/*char * conv = (char *)malloc(sizeof(char)*lenA+1);
+	conv[lenA] = '\0';
+	for(int x=0; x<lenA; x++){
+		conv[x] = '#';
+	}
+	*/
+	char * A_ = (char *)malloc(sizeof(char)*lenA+1);
+	replace_with_char(A_, '$', lenA);
+	A_[lenA]='\0';
+	
+	int lenN;			// The length from ptrm to the end of source.
+	char * ptrm;
+	int isfunc = 0;
+	for(int n=0; n<count; n++){
+		ptrm = ptrM[n];
+		ptrm += lenA;
+		lenN = lenS - (ptrm - *source);
+		for(int m=0; m<lenN; m++){
+			if(ptrm[m]==' ' || ptrm[m]=='\n'){
+				continue;
+			}
+			if(ptrm[m]=='('){
+				isfunc = FUNCTION_NAME;
+				//isfunc = 2;
+				break;
+    		}
+			if(ptrm[m]==';' || ptrm[m]==',' || ptrm[m]=='.'){
+				isfunc = VARIABLE_NAME;
+				//isfunc = 3;
+				break;
+    		}
+    		isfunc = 0;
+    		break;
+    	}
+    	if(isfunc==0){
+    		continue;
+    	}
+    	if(isfunc==FUNCTION_NAME && mode==FUNCTION_NAME){
+    	//if(isfunc==2 && mode==FUNCTION_NAME){
+    		memmove(ptrM[n], A_, lenA);				// If it is a function name, replace it with "####...".
+    		continue;
+    	}
+    	if(isfunc==VARIABLE_NAME && mode==VARIABLE_NAME){
+    	//if(isfunc==3 && mode==VARIABLE_NAME){
+    		memmove(ptrM[n], A_, lenA);				// If it is a variable name, replace it with "####...".
+    		continue;
+    	}
+    }
+    pot = replace(A_, B, source);					// "func_name" >> "func_name_"
+    free(ptrM);//				Printf("!", __LINE__);
+    //free(conv);//				Printf("!", __LINE__);
+    free(A_);//				Printf("!", __LINE__);
+    //				Printf("&&&&\nEnd %d \n&&&&", __LINE__);
+    return;
+}
+
+
+void variable_length_array(char **source){
+	
+	
+	
+	return;
+}
+
+
+void fix_array(char **source){
+	int pot;
+	int lenS = strlen(*source);
+	char * ptr = *source;
+	lenS--;
+	int left = 0;
+	char * ptr_left = NULL;
+	for(int n=0; n<lenS; n++){
+		if(ptr[n]=='['){
+			ptr_left = ptr+n;
+			left++;
+			continue;
+		}
+		if(left){
+			if(ptr[n]==' ' || ptr[n]=='\n'){
+				continue;
+			}
+    		if(ptr[n]==']'){
+    			*ptr_left = '$';
+    			ptr[n] = '`';
+    			ptr_left = NULL;
+    		}
+    	}
+    	left = 0;
+	}
+	pot = replace("[", "[int(", source);
+	pot = replace("]", ")]", source);
+	lenS = strlen(*source);
+	ptr = *source;
+	for(int n=0; n<lenS; n++){
+		if(ptr[n]=='$'){
+			ptr[n]='[';
+		}
+		if(ptr[n]=='`'){
+			ptr[n]=']';
+		}
+	}
+	
+	return;
+}
+
+
+int find_extension(char **source, int *offset){
+	int pot;
+	int lenS = strlen(*source);
+	int len_extension = strlen("#extension ");
+	char ** ptrM = (char **)malloc( ((int)(lenS/len_extension*0.4)+1)*sizeof(char*) );
+	int num_extension = 0;
+	pot = find("#extension ", "#extension ", source, ptrM, &num_extension);
+	
+	int return_value = 0;
+	if(num_extension){
+		int len_enable = strlen("enable");
+		int len_require = strlen("require");
+		int len_warn = strlen("warn");
+		int len_disable = strlen("disable");
+		for(int m=0; m<=num_extension; m++){
+    		if(m==0){continue;}
+    		char * ptr = ptrM[num_extension-m];
+    		ptr += len_extension;
+    		int n;
+    		int arrived = 0;
+    		for(n=0; ptr[n]!='\0'; n++){
+    			if(arrived==0){
+        			if(ptr[n]!=':'){
+        				continue;
+        			}else{
+        				arrived++;
+        				continue;
+        			}
+        		}
+    			/*if(ptr[n]==':'){
+    				arrived++;
+    			}*/
+    			if(ptr[n]==' '){
+    				continue;
+    			}
+    			if(strncmp(ptr+n, "enable", len_enable)==0){
+    				if(ptr[n+len_enable]=='\0'){
+    					return_value = 0;
+    				}else{
+    					ptr[n+len_enable]='\n';
+    					n++;
+    					ptr += n+len_enable;
+    					*offset = ptr - *source;
+    					return_value = num_extension;
+    				}
+    				break;
+    			}
+    			if(strncmp(ptr+n, "require", len_require)==0){
+    				if(ptr[n+len_require]=='\0'){
+    					return_value = 0;
+    				}else{
+    					ptr[n+len_require]='\n';
+    					n++;
+    					ptr += n+len_require;
+    					*offset = ptr - *source;
+    					return_value = num_extension;
+    				}
+    				break;
+    			}
+    			if(strncmp(ptr+n, "warn", len_warn)==0){
+    				if(ptr[n+len_warn]=='\0'){
+    					return_value = 0;
+    				}else{
+    					ptr[n+len_warn]='\n';
+    					n++;
+    					ptr += n+len_warn;
+    					*offset = ptr - *source;
+    					return_value = num_extension;
+    				}
+    				break;
+    			}
+    			if(strncmp(ptr+n, "disable", len_disable)==0){
+    				if(ptr[n+len_disable]=='\0'){
+    					return_value = 0;
+    				}else{
+    					ptr[n+len_disable]='\n';
+    					n++;
+    					ptr += n+len_disable;
+    					*offset = ptr - *source;
+    					return_value = num_extension;
+    				}
+    				break;
+    			}
+    			break;
+    		}
+    		if(return_value){
+    			free(ptrM);
+    			return return_value;
+    		}
+		}
+	}
+	free(ptrM);
+	return 0;
+}
+
+
+
+void replace_with_char(char *ptr, char c, int len){
 	for(int n=0; n<len; n++){
-		ptr[n]=' ';
+		ptr[n]=c;
 	}
 	return;
 }
@@ -1308,7 +1600,7 @@ void fix_const(char *const_, char **source){
 				}
 				if(isconst){
 					num_const++;
-					replace_with_space(ptr+n, len_const);
+					replace_with_char(ptr+n, ' ', len_const);
 				}
 			}
 			isblock=0;
@@ -1368,6 +1660,84 @@ int skip_block(char *left, char *right, char *start, char *end, char **ptr_left,
 	return num_left+num_right;
 }
 
+void fix_int_build_in_variable(char *A, char **source, int type){
+	int pot;
+	int lenA = strlen(A);
+	int lenS = strlen(*source);
+	char * aux = (char *)malloc(lenA+1);
+	for(int x=0; x<lenA; x++){
+		aux[x]='$';
+	}
+	aux[lenA]='\0';
+	
+	int num_A = 0;
+	char ** ptr_arr = (char **)malloc( ((int)(lenS/lenA*0.6)+1)*sizeof(char*) );
+	pot = find(A, A, source, ptr_arr, &num_A);
+	
+	char * ptr = NULL;
+	for(int m=0; m<num_A; m++){				// Check whether the variable name is a separate variable name.
+		ptr = ptr_arr[m];
+		ptr += lenA;
+		if( (*ptr>='a' && *ptr<='z') || (*ptr>='A' && *ptr<='Z') || (*ptr>='0' && *ptr<='9') || *ptr=='_' || *ptr=='$'){
+			ptr -= lenA;
+			memmove(ptr, aux, lenA);
+			ptr += lenA;
+		}
+		ptr -= lenA;
+		if(ptr==*source){continue;}
+		ptr--;
+		if( (*ptr>='a' && *ptr<='z') || (*ptr>='A' && *ptr<='Z') || (*ptr>='0' && *ptr<='9') || *ptr=='_' || *ptr=='$' ){
+			ptr++;
+			memmove(ptr, aux, lenA);
+			ptr--;
+		}
+		ptr++;
+	}
+	
+	int len_add = 0;
+	char constructor[8];
+	switch(type){
+		case GL_INT_:
+		case GL_UINT_:
+			len_add=7;
+			memmove(constructor, "float", len_add-2);
+			constructor[len_add-2]='\0';
+			break;
+		case GL_IVEC2_:
+		case GL_UVEC2_:
+			len_add=6;
+			memmove(constructor, "vec2", len_add-2);
+			constructor[len_add-2]='\0';
+			break;
+		case GL_IVEC3_:
+		case GL_UVEC3_:
+			len_add=6;
+			memmove(constructor, "vec3", len_add-2);
+			constructor[len_add-2]='\0';
+			break;
+		case GL_IVEC4_:
+		case GL_UVEC4_:
+			len_add=6;
+			memmove(constructor, "vec4", len_add-2);
+			constructor[len_add-2]='\0';
+			break;
+	}
+	char * A_ = (char *)malloc(lenA+len_add+1);
+	pot = snprintf(A_, lenA+len_add+1, "%s(%s)", constructor, A);
+	A_[lenA+len_add]='\0';
+	pot = replace(A, A_, source);				// name >> float(name)
+	pot = replace(aux, A, source);
+	
+	free(A_);
+	free(aux);
+	free(ptr_arr);
+	
+	return;
+}
+
+void fix_mod(char **source){
+	return;
+}
 
 void in_to_attribute(char **source){
 	int pot;
