@@ -247,7 +247,7 @@ const GLubyte *glGetString (GLenum name){    _LOAD_GLES
   return (const GLubyte *)"vgpu 1.4.0";
  }
  if(name == GL_VERSION){
-  return (const GLubyte *)"4.4";
+  return (const GLubyte *)"OpenGL: 4.6";
  }
  if(name == GL_VENDOR){
   return (const GLubyte *)"vgpu";
