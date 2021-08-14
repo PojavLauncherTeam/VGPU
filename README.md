@@ -7,11 +7,8 @@ Most of the GL3.0 to GL4.6 apis are now simply wrapped up.
 
 Global Implicit Type Conversion:
 Supported: 
-
 int/ivecn <-> float/vecn
-
 uint/uvecn <-> float/vecn
-
 Converters: 
 Convert most variables in the Shader to the same intermediate type (such as float), and use a type constructor for uniform variables. The converter contains some simple context judgments.
 Some problems brought about by this:
