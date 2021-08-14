@@ -91,7 +91,7 @@ int main(void){
  FILE * fpB;
  size_t resultB;
  
- fpB = fopen ( "_shader.fsh", "wb" );
+ fpB = fopen ( "shader_.fsh", "wb" );
  if (fpB == NULL)
  {
   fputs ("File error 2", stderr);
