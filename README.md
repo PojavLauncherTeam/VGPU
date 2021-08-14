@@ -6,22 +6,22 @@ Most of the GL2.x API and a small amount of GL3.x API(mainly texture and Uniform
 Most of the GL3.0 to GL4.6 apis are now simply wrapped up.
 
 Global Implicit Type Conversion: 
-Supported: 
-int/ivecn <-> float/vecn 
-uint/uvecn <-> float/vecn 
-Converters: 
+Supported:
+int/ivecn <-> float/vecn
+uint/uvecn <-> float/vecn
+Converters:
 Convert most variables in the Shader to the same intermediate type (such as float), and use a type constructor for uniform variables. The converter contains some simple context judgments.
-Some problems brought about by this: 
+Some problems brought about by this:
 The arguments and return values of some built-in functions that use type int are constructed as intermediate types, which causes them to fail. But most of these functions have now been fixed.
 
 Universal Syntax Converter:
-Shader conversion is based on ESSL3.x. 
-For GLSL120+(compatibility), all GLSL120 built-in variables and keywords will be converted to ESSL3.x, such as gl_FragData[n]. 
+Shader conversion is based on ESSL3.x.
+For GLSL120+(compatibility), all GLSL120 built-in variables and keywords will be converted to ESSL3.x, such as gl_FragData[n].
 For GLSL150+(core), the converter now only has some simple conversions (it is not yet separated from the former).
 
 Other converters:
 (Based on simple contextual judgments)
-Supports assigning nonconst variables to const variables within a block. 
+Supports assigning nonconst variables to const variables within a block.
 not supported declaring array sizes with simple variables initialized to constants yet.
 The % mod operator is not yet supported (this causes MC1.17 to fail because shader uses %)
 
