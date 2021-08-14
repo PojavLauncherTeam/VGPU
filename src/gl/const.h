@@ -1,9 +1,9 @@
 #ifndef _GL4ES_CONST_H_
 #define _GL4ES_CONST_H_
 
-#define GL_QUADS      7
-#define GL_QUAD_STRIP 8
-#define GL_POLYGON    9
+#define GL_QUADS      0x0007
+#define GL_QUAD_STRIP 0x0008
+#define GL_POLYGON    0x0009
 
 #define GL_MAJOR_VERSION            0x821B
 #define GL_MINOR_VERSION            0x821C

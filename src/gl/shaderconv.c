@@ -455,7 +455,7 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
   if(versionString && strcmp(versionString, "120")==0)
      version120 = 1;
   //if(version120) {
-  if(hardext.glsl300es) {
+  /*if(hardext.glsl300es) {
 	versionHeader = 1;
 	if(hardext.glsl310es) {
 		versionHeader = 2;
@@ -463,7 +463,7 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
 			versionHeader = 3;
 		}
 	}
-  }
+  }*/
       /* location on uniform not supported ! */ 
         /* else no location or in / out are supported */
   //}

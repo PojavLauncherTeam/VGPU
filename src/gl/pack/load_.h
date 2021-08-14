@@ -1,6 +1,7 @@
 #include <dlfcn.h>
 #include <stdlib.h>
 #include "load.h"
+#include "Initialization_.c"
 
 void load_all(void){
 	
@@ -347,7 +348,7 @@ void load_all(void){
 /*PFNglCopyImageSubData */    _gles_glCopyImageSubData = (PTR_glCopyImageSubData)dlsym(libGL, "glCopyImageSubData");
 /*PFNglDebugMessageControl */    _gles_glDebugMessageControl = (PTR_glDebugMessageControl)dlsym(libGL, "glDebugMessageControl");
 /*PFNglDebugMessageInsert */    _gles_glDebugMessageInsert = (PTR_glDebugMessageInsert)dlsym(libGL, "glDebugMessageInsert");
-///*PFNglDebugMessageCallback */    _gles_glDebugMessageCallback = (PTR_glDebugMessageCallback)dlsym(libGL, "glDebugMessageCallback");
+/*PFNglDebugMessageCallback */    _gles_glDebugMessageCallback = (PTR_glDebugMessageCallback)dlsym(libGL, "glDebugMessageCallback");
 /*PFNglGetDebugMessageLog */    _gles_glGetDebugMessageLog = (PTR_glGetDebugMessageLog)dlsym(libGL, "glGetDebugMessageLog");
 /*PFNglPushDebugGroup */    _gles_glPushDebugGroup = (PTR_glPushDebugGroup)dlsym(libGL, "glPushDebugGroup");
 /*PFNglPopDebugGroup */    _gles_glPopDebugGroup = (PTR_glPopDebugGroup)dlsym(libGL, "glPopDebugGroup");
@@ -390,6 +391,8 @@ void load_all(void){
 
 
 	dlclose(libGL);
+	
+	Initialization_();
 	
 }
 
