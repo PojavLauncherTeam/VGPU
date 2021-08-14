@@ -164,8 +164,8 @@ extern void *gles, *egl, *bcm_host, *vcos, *gbm, *drm;
 #define LOAD_LIB_SILENT(lib, name) DEFINE_RAW(lib, name); LOAD_RAW_SILENT(lib, name, proc_address(lib, #name))
 #define LOAD_LIB_ALT(lib, alt, name) DEFINE_RAW(lib, name); LOAD_RAW_ALT(lib, alt, name, proc_address(lib, #name))
 
-#define LOAD_GLES(name)         LOAD_GLES2(name)
 #define LOAD_GLES2(name)        LOAD_LIB_SILENT(gles, name)
+#define LOAD_GLES(name)         LOAD_GLES2(name)
 #define LOAD_GLES_OR_FPE(name)  LOAD_LIB_ALT(gles, fpe, name)
 
 #define LOAD_GLES_FPE(name) \
@@ -181,18 +181,20 @@ extern void *gles, *egl, *bcm_host, *vcos, *gbm, *drm;
 #define LOAD_GBM(name) LOAD_LIB(gbm, name)
 
 #if defined(AMIGAOS4) || defined(NOEGL) || defined(__EMSCRIPTEN__)
-#define LOAD_GLES_OES(name) \
+#define LOAD_GLES_OES(name) LOAD_GLES2(name)
+/*#define LOAD_GLES_OES(name) \
     DEFINE_RAW(gles, name); \
     { \
         LOAD_RAW(gles, name, proc_address(gles, #name"OES")); \
     }
-
-#define LOAD_GLES_EXT(name) \
+*/
+#define LOAD_GLES_EXT(name) LOAD_GLES2(name)
+/*#define LOAD_GLES_EXT(name) \
     DEFINE_RAW(gles, name); \
     { \
         LOAD_RAW(gles, name, proc_address(gles, #name"EXT")); \
     }
-
+*/
 #define LOAD_GLES2_OR_OES(name) LOAD_GLES2(name)
     /*
     DEFINE_RAW(gles, name); \
@@ -207,20 +209,22 @@ extern void *gles, *egl, *bcm_host, *vcos, *gbm, *drm;
     DEFINE_RAW(egl, name); \
     LOAD_RAW_3(egl, name, proc_address(egl, #name), proc_address(egl, #name "EXT"), LOAD_EGL(eglGetProcAddress); LOAD_RAW(egl, name, egl_eglGetProcAddress(#name "EXT")); )
 
-#define LOAD_GLES_OES(name) \
+#define LOAD_GLES_OES(name) LOAD_GLES2(name)
+/*#define LOAD_GLES_OES(name) \
     DEFINE_RAW(gles, name); \
     { \
         LOAD_EGL(eglGetProcAddress); \
         LOAD_RAW(gles, name, egl_eglGetProcAddress(#name"OES")); \
     }
-
-#define LOAD_GLES_EXT(name) \
+*/
+#define LOAD_GLES_EXT(name) LOAD_GLES2(name)
+/*#define LOAD_GLES_EXT(name) \
     DEFINE_RAW(gles, name); \
     { \
         LOAD_EGL(eglGetProcAddress); \
         LOAD_RAW(gles, name, egl_eglGetProcAddress(#name"EXT")); \
     }
-
+*/
 #define LOAD_GLES2_OR_OES(name) LOAD_GLES2(name)
     /*
     DEFINE_RAW(gles, name); \

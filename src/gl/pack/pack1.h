@@ -4,7 +4,15 @@
 
 // // #define GLAPI extern
 
+// ======== glu
+//#include "glu_pack.h"
 
+//EX(gluBuild2DMipmaps);
+
+
+
+
+// ======== gl
 #include "pack.h"
 
 

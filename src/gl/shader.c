@@ -286,7 +286,7 @@ int isShaderCompatible(GLuint shader, shaderconv_need_t *need) {
 #undef SUPER
 
 void redoShader(GLuint shader, shaderconv_need_t *need) {
-    LOAD_GLES2(glShaderSource);
+    /*LOAD_GLES2(glShaderSource);
     if(!gles_glShaderSource)
         return;
     CHECK_SHADER(void, shader)
@@ -299,7 +299,7 @@ void redoShader(GLuint shader, shaderconv_need_t *need) {
     memcpy(&glshader->need, need, sizeof(shaderconv_need_t));
     //glshader->converted = ConvertShader(glshader->source, glshader->type==GL_VERTEX_SHADER?1:0, &glshader->need);
     // send source to GLES2 hardware if any
-    
+    */
     /*int len_source = strlen(glshader->source);
     char * source_ = (char *)malloc(len_source+1);
     memmove(source_, glshader->source, len_source);

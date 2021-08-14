@@ -1,16 +1,16 @@
 // OpenGL 2.0 >> 3.0
 
-#include "load_.h"
-#include "pack.h"
-#include "pack_.h"
-//#include "toext.h"
-
-
 #include <string.h>
 #include <stdio.h>
 #include <android/log.h>
 
 #define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
+
+#include "load_.h"
+#include "pack.h"
+#include "pack_.h"
+//#include "glu_pack.c"
+
 
 int loaded = 0;
 
@@ -90,6 +90,10 @@ void glTexImage1D (GLenum target, GLint level, GLint internalformat, GLsizei wid
 }
 
 void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels){    _LOAD_GLES    
+ if(level>0){
+ 	;
+ }
+ 
  gl4es_glTexImage2D (target, level, internalformat, width, height, border, format, type, pixels);
 
 }
@@ -162,12 +166,12 @@ void glEnable (GLenum cap){    _LOAD_GLES
 }
 
 void glFinish (void){    _LOAD_GLES    
- gl4es_glFinish ();
+ _gles_glFinish ();
 
 }
 
 void glFlush (void){    _LOAD_GLES    
- gl4es_glFlush ();
+ _gles_glFlush ();
 
 }
 
@@ -1545,7 +1549,8 @@ void glGetFramebufferAttachmentParameteriv (GLenum target, GLenum attachment, GL
 }
 
 void glGenerateMipmap (GLenum target){    _LOAD_GLES    
- gl4es_glGenerateMipmap (target);
+ Printf("Calling glGenerateMipmap");
+ _gles_glGenerateMipmap (target);
 
 }
 

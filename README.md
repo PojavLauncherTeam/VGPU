@@ -5,7 +5,7 @@ GLAPI wrap:
 Most of the GL2.x API and a small amount of GL3.x API(mainly texture and Uniform, because some of the special built-in variables of GLSL120 are now provided by GL4ES by combining API(glUniform) with shader string converters, such as gl_Vertex) now call gl4es.
 Most of the GL3.0 to GL4.6 apis are now simply wrapped up.
 
-Global Implicit Type Conversion: 
+Global Implicit Type Conversion:
 Supported:
 int/ivecn <-> float/vecn
 uint/uvecn <-> float/vecn
