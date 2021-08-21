@@ -14,8 +14,8 @@ extern void allSetEnv(void);
 #define ENV_NUM 2
 char * SETENVS[ENV_NUM] = {
 	"LIBGL_NORMALIZE=1",
-	"LIBGL_MIPMAP=0"
-	//"LIBGL_FB=2"
+	"LIBGL_MIPMAP=3"
+	"LIBGL_FB=2"
 };
 
 #include "setenv.c"
