@@ -101,7 +101,7 @@ LOCAL_CFLAGS += -DDEFAULT_ES=2
 LOCAL_CFLAGS += -Wno-typedef-redefinition -Wno-dangling-else
 
 LOCAL_LDLIBS := -llog
-#building as a static lib
+#building as a shared lib
 
-LOCAL_CFLAGS += -DSTATICLIB
-include $(BUILD_STATIC_LIBRARY)
+LOCAL_CFLAGS += -DSHAREDLIB
+include $(BUILD_SHARED_LIBRARY)
