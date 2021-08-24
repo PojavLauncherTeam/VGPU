@@ -10,7 +10,7 @@
 #define _VGPU_VERSION_H
 
 #define MAJOR_ 1
-#define MINOR_ 4
-#define REVISION_ 0
+#define MINOR_ 3
+#define REVISION_ 6
 
 #endif

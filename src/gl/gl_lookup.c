@@ -142,7 +142,7 @@ void *gl4es_GetProcAddress(const char *name) {
         _ARB(glFramebufferTextureLayer);
         _ARB(glBlitFramebuffer);
         _EX(glDrawBuffers);
-        _ARB(glDrawBuffers);
+        __ARB(glDrawBuffers);
         _EX(glClearBufferiv);
         _EX(glClearBufferuiv);
         _EX(glClearBufferfv);

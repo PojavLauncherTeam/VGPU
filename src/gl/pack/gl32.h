@@ -25,7 +25,6 @@ typedef unsigned char GLboolean;
 typedef int GLsizei;
 typedef khronos_uint8_t GLubyte;
 typedef khronos_uint16_t GLhalf;
-typedef void ( *GLDEBUGPROC)(GLenum source,GLenum type,GLuint id,GLenum severity,GLsizei length,const GLchar *message,const void *userParam);
 
 
 // GL_ES_VERSION_2_0
@@ -356,7 +355,7 @@ typedef void (* PTR_glBlendBarrier) (void);
 typedef void (* PTR_glCopyImageSubData) (GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth);
 typedef void (* PTR_glDebugMessageControl) (GLenum source, GLenum type, GLenum severity, GLsizei count, const GLuint *ids, GLboolean enabled);
 typedef void (* PTR_glDebugMessageInsert) (GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *buf);
-typedef void (* PTR_glDebugMessageCallback) (GLDEBUGPROC callback, const void *userParam);
+//typedef void (* PTR_glDebugMessageCallback) (GLDEBUGPROC callback, const void *userParam);
 typedef GLuint (* PTR_glGetDebugMessageLog) (GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types, GLuint *ids, GLenum *severities, GLsizei *lengths, GLchar *messageLog);
 typedef void (* PTR_glPushDebugGroup) (GLenum source, GLuint id, GLsizei length, const GLchar *message);
 typedef void (* PTR_glPopDebugGroup) (void);

@@ -228,7 +228,7 @@ void gl4es_glTexParameteri(GLenum target, GLenum pname, GLint param) {
     if(!glstate->list.pending) {
         PUSH_IF_COMPILING(glTexParameteri);
     }
-    LOAD_GLES2(glTexParameteri);
+    LOAD_GLES(glTexParameteri);
     noerrorShim();
     const GLint itarget = what_target(target);
     const GLuint rtarget = map_tex_target(target);
@@ -322,7 +322,6 @@ void gl4es_glTexParameteri(GLenum target, GLenum pname, GLint param) {
                 realize_bound(glstate->texture.active, target);
                 LOAD_GLES2_OR_OES(glGenerateMipmap);
                 gl4es_glGenerateMipmap(rtarget);
-                //gles_glGenerateMipmap(rtarget);
                 if(texture->wanted_min != texture->min_filter)
                     gl4es_glTexParameteri(target, GL_TEXTURE_MIN_FILTER, texture->wanted_min);
             }
