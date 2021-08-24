@@ -155,9 +155,9 @@ void gl4es_glCompileShader(GLuint shader) {
         
         //Printf("LIBGL: Error while compiling shader %d. >>>>>>>>Original source is:\n%s\n>>>>>>>>\n", glshader->id, glshader->source);
         //Printf(">>>>>>>>ShaderConv Source is:\n%s\n>>>>>>>>\n", glshader->converted);
-        char tmp[5000];
+        char tmp[1024];
         GLint length;
-        gles_glGetShaderInfoLog(glshader->id, 4000, &length, tmp);
+        gles_glGetShaderInfoLog(glshader->id, 1023, &length, tmp);
         Printf(">>>>>>>>Compiler message is\n%s\nLIBGL: End of Error log>>>>>>>>\n", tmp);
     	//}
         //}
@@ -286,7 +286,7 @@ int isShaderCompatible(GLuint shader, shaderconv_need_t *need) {
 #undef SUPER
 
 void redoShader(GLuint shader, shaderconv_need_t *need) {
-    /*LOAD_GLES2(glShaderSource);
+    LOAD_GLES2(glShaderSource);
     if(!gles_glShaderSource)
         return;
     CHECK_SHADER(void, shader)
@@ -299,7 +299,7 @@ void redoShader(GLuint shader, shaderconv_need_t *need) {
     memcpy(&glshader->need, need, sizeof(shaderconv_need_t));
     //glshader->converted = ConvertShader(glshader->source, glshader->type==GL_VERTEX_SHADER?1:0, &glshader->need);
     // send source to GLES2 hardware if any
-    */
+    
     /*int len_source = strlen(glshader->source);
     char * source_ = (char *)malloc(len_source+1);
     memmove(source_, glshader->source, len_source);

@@ -794,7 +794,7 @@ GLvoid glGetUniformfvARB(GLhandleARB programObj, GLint location, GLfloat *params
 GLvoid glGetUniformivARB(GLhandleARB programObj, GLint location, GLint *params) AliasExport("gl4es_glGetUniformiv");
 
 // ===============
-/*void glProgramUniform1f(GLuint program, GLint location, GLfloat v0) AliasExport("gl4es_glProgramUniform1f");
+void glProgramUniform1f(GLuint program, GLint location, GLfloat v0) AliasExport("gl4es_glProgramUniform1f");
 void glProgramUniform2f(GLuint program, GLint location, GLfloat v0, GLfloat v1) AliasExport("gl4es_glProgramUniform2f");
 void glProgramUniform3f(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2) AliasExport("gl4es_glProgramUniform3f");
 void glProgramUniform4f(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) AliasExport("gl4es_glProgramUniform4f");
@@ -813,7 +813,6 @@ void glProgramUniform4iv(GLuint program, GLint location, GLsizei count, const GL
 void glProgramUniformMatrix2fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) AliasExport("gl4es_glProgramUniformMatrix2fv");
 void glProgramUniformMatrix3fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) AliasExport("gl4es_glProgramUniformMatrix3fv");
 void glProgramUniformMatrix4fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) AliasExport("gl4es_glProgramUniformMatrix4fv");
-*/
 // ===============	EXT_direct_state_access (part of it)
 void glProgramUniform1fEXT(GLuint program, GLint location, GLfloat v0) AliasExport("gl4es_glProgramUniform1f");
 void glProgramUniform2fEXT(GLuint program, GLint location, GLfloat v0, GLfloat v1) AliasExport("gl4es_glProgramUniform2f");

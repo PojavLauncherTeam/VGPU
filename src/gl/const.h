@@ -1,9 +1,9 @@
 #ifndef _GL4ES_CONST_H_
 #define _GL4ES_CONST_H_
 
-#define GL_QUADS      0x0007
-#define GL_QUAD_STRIP 0x0008
-#define GL_POLYGON    0x0009
+#define GL_QUADS      7
+#define GL_QUAD_STRIP 8
+#define GL_POLYGON    9
 
 #define GL_MAJOR_VERSION            0x821B
 #define GL_MINOR_VERSION            0x821C
@@ -589,7 +589,7 @@
 #define GL_TEXTURE_DEPTH_TYPE             0x8C16
 #define GL_UNSIGNED_NORMALIZED            0x8C17
 #define GL_FRAMEBUFFER_BINDING            0x8CA6
-#define GL_DRAW_FRAMEBUFFER_BINDING       0x8CA6
+#define GL_DRAW_FRAMEBUFFER_BINDING       GL_FRAMEBUFFER_BINDING
 #define GL_RENDERBUFFER_BINDING           0x8CA7
 #define GL_READ_FRAMEBUFFER               0x8CA8
 #define GL_DRAW_FRAMEBUFFER               0x8CA9

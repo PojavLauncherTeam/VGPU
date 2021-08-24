@@ -55,7 +55,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
-  	add_marker(glshader_converted);
+  	//add_marker(glshader_converted);
   	if(strstr(*glshader_converted, "@@FIX_MARKER_VGPU@@")){
   		Printf("add marker succeed!");
   	}else{
@@ -72,8 +72,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	fix_layout(glshader_converted);
   	if(vsh){
   		//pot = replace("gl_VertexID", "float(gl_VertexID)", glshader_converted);
-  		fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
-  		fix_int_build_in_variable("gl_InstanceID", glshader_converted, GL_INT_);
+  		//fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
+  		//fix_int_build_in_variable("gl_InstanceID", glshader_converted, GL_INT_);
   	}else{
   		//fix_int_build_in_variable("gl_VertexID", glshader_converted);
   	}
@@ -1843,7 +1843,7 @@ void fix_layout(char **source){
 void add_marker(char **converted){// ##FIX_MARKER_VGPU##
 	int lenS = strlen(*converted);
 	int len_marker = strlen("////@@@@FIX_MARKER_VGPU@@@@");
-	char * converted_ = (char *)malloc(lenS+len_marker+1);
+	char * converted_ = (char *)malloc(lenS+len_marker+2);
 	memmove(converted_, *converted, lenS);
 	memmove(converted_+lenS, "////@@@@FIX_MARKER_VGPU@@@@", len_marker);
 	converted_[lenS+len_marker]='\0';

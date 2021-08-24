@@ -699,14 +699,14 @@ void glGetBufferPointervARB(GLenum target, GLenum pname, GLvoid ** params) Alias
 #endif
 
 //Direct Access
-/*void glNamedBufferData(GLuint buffer, GLsizeiptr size, const GLvoid * data, GLenum usage) AliasExport("gl4es_glNamedBufferData");
+void glNamedBufferData(GLuint buffer, GLsizeiptr size, const GLvoid * data, GLenum usage) AliasExport("gl4es_glNamedBufferData");
 void glNamedBufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, const GLvoid * data) AliasExport("gl4es_glNamedBufferSubData");
 void glGetNamedBufferParameteriv(GLuint buffer, GLenum value, GLint * data) AliasExport("gl4es_glGetNamedBufferParameteriv");
 void *glMapNamedBuffer(GLuint buffer, GLenum access) AliasExport("gl4es_glMapNamedBuffer");
 GLboolean glUnmapNamedBuffer(GLuint buffer) AliasExport("gl4es_glUnmapNamedBuffer");
 void glGetNamedBufferSubData(GLuint buffer, GLintptr offset, GLsizeiptr size, GLvoid * data) AliasExport("gl4es_glGetNamedBufferSubData");
 void glGetNamedBufferPointerv(GLuint buffer, GLenum pname, GLvoid ** params) AliasExport("gl4es_glGetNamedBufferPointerv");
-*/
+
 void glNamedBufferDataEXT(GLuint buffer, GLsizeiptr size, const GLvoid * data, GLenum usage) AliasExport("gl4es_glNamedBufferData");
 void glNamedBufferSubDataEXT(GLuint buffer, GLintptr offset, GLsizeiptr size, const GLvoid * data) AliasExport("gl4es_glNamedBufferSubData");
 void glGetNamedBufferParameterivEXT(GLuint buffer, GLenum value, GLint * data) AliasExport("gl4es_glGetNamedBufferParameteriv");
