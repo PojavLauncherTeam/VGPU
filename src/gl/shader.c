@@ -155,9 +155,9 @@ void gl4es_glCompileShader(GLuint shader) {
         
         //Printf("LIBGL: Error while compiling shader %d. >>>>>>>>Original source is:\n%s\n>>>>>>>>\n", glshader->id, glshader->source);
         //Printf(">>>>>>>>ShaderConv Source is:\n%s\n>>>>>>>>\n", glshader->converted);
-        char tmp[5000];
+        char tmp[1024];
         GLint length;
-        gles_glGetShaderInfoLog(glshader->id, 4000, &length, tmp);
+        gles_glGetShaderInfoLog(glshader->id, 1023, &length, tmp);
         Printf(">>>>>>>>Compiler message is\n%s\nLIBGL: End of Error log>>>>>>>>\n", tmp);
     	//}
         //}

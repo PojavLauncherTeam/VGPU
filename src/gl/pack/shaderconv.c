@@ -53,14 +53,18 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	else
   		vsh = 0;
   	
-	GLSLHeader(glshader_converted);
-  	
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
+  	//add_marker(glshader_converted);
+  	if(strstr(*glshader_converted, "@@FIX_MARKER_VGPU@@")){
+  		Printf("add marker succeed!");
+  	}else{
+  		Printf("failed to add marker!");
+  	}
   	if(vsh){
   		in_to_attribute(glshader_converted);				// in >> attribute
   	}
-  	add_marker(glshader_converted);
+  	GLSLHeader(glshader_converted);
   	fix_const("const ", glshader_converted);
   	//pot = replace("#ext", "//#ext", glshader_converted);				// #extension
   	
@@ -68,7 +72,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	fix_layout(glshader_converted);
   	if(vsh){
   		//pot = replace("gl_VertexID", "float(gl_VertexID)", glshader_converted);
-  		fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
+  		//fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
+  		//fix_int_build_in_variable("gl_InstanceID", glshader_converted, GL_INT_);
   	}else{
   		//fix_int_build_in_variable("gl_VertexID", glshader_converted);
   	}
@@ -93,13 +98,13 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	//if(isshadow){
 	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
 	pot = replace("texelFetch", "texelFetch_", glshader_converted);
-	pot = replace("textureGather", "textureGather_", glshader_converted);	Printf("Calling %d ", __LINE__);
-	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	Printf("Calling %d ", __LINE__);
-	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+	pot = replace("textureGather", "textureGather_", glshader_converted);	//Printf("Calling %d ", __LINE__);
+	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	//Printf("Calling %d ", __LINE__);
+	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
 	//}
 	
 	int cut_in_offset;
-  	int isextension = find_extension(glshader_converted, &cut_in_offset);	Printf("Calling %d extension = %d ", __LINE__, isextension);
+  	int isextension = find_extension(glshader_converted, &cut_in_offset);	Printf("extension = %d ", isextension);
   	if(isextension==0){
   		char * ptr_offset = strstr(*glshader_converted, "0 es");//				Printf(" cut_in_offset = %d ", cut_in_offset);
   		if(ptr_offset){
@@ -110,8 +115,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	}
   	char * ptr_cut_in = *glshader_converted + cut_in_offset;
   	
-	func_build_in(glshader_converted, cut_in_offset, SHADOW);	Printf("Calling %d ", __LINE__);//				Printf("!", __LINE__);
-	Printf("Calling %d ", __LINE__);
+	func_build_in(glshader_converted, cut_in_offset, SHADOW);	//Printf("Calling %d ", __LINE__);//				Printf("!", __LINE__);
+	//Printf("Calling %d ", __LINE__);
 	
 	
 	// ======== Built-in variable
@@ -146,7 +151,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	
 	// ======== Integer type compatibility
 	variable_length_array(glshader_converted);
-	fix_array(glshader_converted);	Printf("Calling %d ", __LINE__);
+	fix_array(glshader_converted);	//Printf("Calling %d ", __LINE__);
 	//pot = replace("[", "[int(", glshader_converted);//				Printf("!", __LINE__);
 	//pot = replace("]", ")]", glshader_converted);//				Printf("!", __LINE__);
 	
@@ -1837,17 +1842,17 @@ void fix_layout(char **source){
 
 void add_marker(char **converted){// ##FIX_MARKER_VGPU##
 	int lenS = strlen(*converted);
-	int len_marker = strlen("##FIX_MARKER_VGPU@@@@");
-	char * converted_ = (char *)malloc(lenS+len_marker+1);
+	int len_marker = strlen("////@@@@FIX_MARKER_VGPU@@@@");
+	char * converted_ = (char *)malloc(lenS+len_marker+2);
 	memmove(converted_, *converted, lenS);
-	memmove(converted_+lenS, "##FIX_MARKER_VGPU@@@@", len_marker);
+	memmove(converted_+lenS, "////@@@@FIX_MARKER_VGPU@@@@", len_marker);
 	converted_[lenS+len_marker]='\0';
 	free(*converted);
 	*converted=converted_;
 	return;
 }
 void fix_marker(char **converted){
-	char * find_marker = strstr(*converted, "##FIX_MARKER_VGPU@@");
+	char * find_marker = strstr(*converted, "@@FIX_MARKER_VGPU@@");
 	if(find_marker!=NULL){
 		*find_marker='\0';
 		Printf("find marker succeed!");
