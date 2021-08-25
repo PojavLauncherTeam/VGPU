@@ -1543,7 +1543,7 @@ void glGetFramebufferAttachmentParameteriv (GLenum target, GLenum attachment, GL
 }
 
 void glGenerateMipmap (GLenum target){    _LOAD_GLES    
- gl4es_glGenerateMipmap (target);
+ _gles_glGenerateMipmap (target);
 
 }
 

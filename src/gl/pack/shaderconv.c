@@ -92,16 +92,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 		pot = replace("varying", "in", glshader_converted);//				Printf("!", __LINE__);
 	}
 	
-	// ======== Built-in function
-	pot = replace("texture2D", "texture", glshader_converted);
-	//char * isshadow = strstr(*glshader_converted, "shadow");				printf("shadow = %p \n", isshadow);
-	//if(isshadow){
-	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
-	pot = replace("texelFetch", "texelFetch_", glshader_converted);
-	pot = replace("textureGather", "textureGather_", glshader_converted);	//Printf("Calling %d ", __LINE__);
-	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	//Printf("Calling %d ", __LINE__);
-	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
-	//}
+	// ======== Built-in variable
 	
 	int cut_in_offset;
   	int isextension = find_extension(glshader_converted, &cut_in_offset);	Printf("extension = %d ", isextension);
@@ -114,12 +105,6 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   		}
   	}
   	char * ptr_cut_in = *glshader_converted + cut_in_offset;
-  	
-	func_build_in(glshader_converted, cut_in_offset, SHADOW);	//Printf("Calling %d ", __LINE__);//				Printf("!", __LINE__);
-	//Printf("Calling %d ", __LINE__);
-	
-	
-	// ======== Built-in variable
 	
 	if(!vsh){
 		char * gl_FragColor = strstr(*glshader_converted, "gl_FragColor");//				Printf("!", __LINE__);
@@ -146,6 +131,23 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
     		}
 		}
 	}
+	
+	
+	
+	// ======== Built-in function
+	pot = replace("texture2D", "texture", glshader_converted);
+	//char * isshadow = strstr(*glshader_converted, "shadow");				printf("shadow = %p \n", isshadow);
+	//if(isshadow){
+	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
+	pot = replace("texelFetch", "texelFetch_", glshader_converted);
+	pot = replace("textureGather", "textureGather_", glshader_converted);	//Printf("Calling %d ", __LINE__);
+	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	//Printf("Calling %d ", __LINE__);
+	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+	//}
+	
+  	
+	func_build_in(glshader_converted, cut_in_offset, SHADOW);	//Printf("Calling %d ", __LINE__);//				Printf("!", __LINE__);
+	//Printf("Calling %d ", __LINE__);
 	
 	
 	
@@ -182,6 +184,7 @@ static char _texture2DLod[]=
 "}"
 ;
 static char _shadow2D[]=
+//"#extension GL_EXT_shader_non_constant_global_initializers : enable\n"
 "precision mediump sampler2DShadow;\n"
 "precision highp float;\n"
 "precision mediump int;\n"
