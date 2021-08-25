@@ -1,5 +1,5 @@
 # VGPU_VK
-This branch project is based on GLOVE. The goal is to achieve compatibility with native EGL and implement GL2.0 + on the basis of GLES2 and GLOVE.
+This branch project is based on GLOVE. The goal is to achieve compatibility with native EGL and implement GL2.0 + on the basis of GLOVE.
 
 # Current State
 The interoperability of GLES/EGL with Vulkan on the buffer is now implemented through the GLES3.2 extension 
