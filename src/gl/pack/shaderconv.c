@@ -40,6 +40,9 @@
 		cut_in(ptr_cut_in, "layout(location = " #N ") out mediump vec4 FragData" #N ";\n", glshader_converted); \
 	}
 
+#ifdef __APPLE__
+typedef unsigned int uint;
+#endif
 
 
 void shader_conv_(char **glshader_source, char **glshader_converted){//				Printf("&&&&\nStart %d \n&&&&", __LINE__);
