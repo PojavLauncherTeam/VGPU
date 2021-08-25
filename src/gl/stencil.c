@@ -72,7 +72,7 @@ void gl4es_glStencilFunc(GLenum func, GLint ref, GLuint mask) {
 }
 //void glStencilFunc(GLenum func, GLint ref, GLuint mask) AliasExport("gl4es_glStencilFunc");
 #ifdef __APPLE__
-void glStencilFunc(GLenum func, GLint ref, GLuint mask) { gl4es_glStencilFunc(func, ref, mask); }
+void glStencilFunc(GLenum func, GLint ref, GLuint mask);
 #endif
 
 void gl4es_glStencilFuncSeparate(GLenum face, GLenum func, GLint ref, GLuint mask) {
@@ -129,7 +129,7 @@ void gl4es_glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) {
 }
 //void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) AliasExport("gl4es_glStencilOp");
 #ifdef __APPLE__
-void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) { gl4es_glStencilOp(fail, zfail, zpass); }
+void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass);
 #endif
 
 void gl4es_glStencilOpSeparate(GLenum face, GLenum sfail, GLenum zfail, GLenum zpass) {
