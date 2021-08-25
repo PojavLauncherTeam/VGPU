@@ -18,6 +18,8 @@
 int loaded = 0;
 
 int InitVulkan(void) {
+    if(loaded) { return loaded; }
+    
     void* libvulkan = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
     if (!libvulkan)
         return 0;
@@ -212,6 +214,8 @@ int InitVulkan(void) {
     vk_DestroyDebugReportCallbackEXT = reinterpret_cast<PFN_vkDestroyDebugReportCallbackEXT>(dlsym(libvulkan, "vkDestroyDebugReportCallbackEXT"));
     vk_DebugReportMessageEXT = reinterpret_cast<PFN_vkDebugReportMessageEXT>(dlsym(libvulkan, "vkDebugReportMessageEXT"));
 #endif
+	dlclose(libvulkan);
+	
     return 1;
 }
 

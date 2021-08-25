@@ -46,7 +46,7 @@
 #include "loader/vk_loader.h"
 
 extern int loaded;
-#define VK_LOAD loaded=InitVulkan();
+#define VK_LOAD if(loaded==0){loaded=InitVulkan();}
 
 
 using namespace std;
