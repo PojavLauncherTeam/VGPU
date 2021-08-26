@@ -7,7 +7,12 @@ GL_EXT_memory_object
 GL_EXT_memory_object_fd.
 (It has not yet been written to the branch.)
 
-Android.mk doesn't seem to work properly because libc++ seems to have some problems, But you can use cmake to compile GLOVE on Linux.
+The GL implementation will use the built-in off-screen context.(It has not yet been separated from GLOVE's EGL implementation)
+
+Main Work Flow:
+GL achieves off-screen rendering and saves the results to external image memory.
+This memory object is imported through the GLES 3.2 extension and rendered onto the surface created by the native EGL.
+
 Added a simple vk API loader, and change some modules to make it suitable for android.
 Slowly update, welcome to contribute!
 
