@@ -86,7 +86,7 @@ LOCAL_SRC_FILES := \
     
 
 LOCAL_CFLAGS = -g -fexceptions -frtti -std=c++11 -Wall
-LOCAL_CFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+#LOCAL_CFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
 #LOCAL_CFLAGS += -O3
 LOCAL_CFLAGS += -funwind-tables -fvisibility=hidden
 LOCAL_CFLAGS += -DVK_USE_PLATFORM_ANDROID_KHR

@@ -77,18 +77,18 @@ using namespace std;
 #define GLOVE_FIXED_ONE                                 (1 << GLOVE_FIXED_PRECISION)
 
 // GL
-#define GLOVE_FIXED_TO_FLOAT(x)                         x * (1.0f / static_cast<float>(GLOVE_FIXED_ONE))
+#define GLOVE_FIXED_TO_FLOAT(x)                         (x * (1.0f / static_cast<float>(GLOVE_FIXED_ONE)))
 
 // GL ES Limits
 #define GLOVE_MAX_VERTEX_ATTRIBS                        32    // MIN VALUE:   8
 #define GLOVE_MAX_VARYING_VECTORS                       8     // MIN VALUE:   8
 #define GLOVE_MAX_VERTEX_UNIFORM_VECTORS                128   // MIN VALUE: 128
 #define GLOVE_MAX_FRAGMENT_UNIFORM_VECTORS              128   // MIN VALUE:  16
-#define GLOVE_MAX_COMBINED_UNIFORM_VECTORS              GLOVE_MAX_VERTEX_UNIFORM_VECTORS     + GLOVE_MAX_FRAGMENT_UNIFORM_VECTORS
+#define GLOVE_MAX_COMBINED_UNIFORM_VECTORS              (GLOVE_MAX_VERTEX_UNIFORM_VECTORS     + GLOVE_MAX_FRAGMENT_UNIFORM_VECTORS)
 
 #define GLOVE_MAX_VERTEX_TEXTURE_IMAGE_UNITS            8     // MIN VALUE:  0
 #define GLOVE_MAX_TEXTURE_IMAGE_UNITS                   32    // MIN VALUE:  8
-#define GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS          GLOVE_MAX_VERTEX_TEXTURE_IMAGE_UNITS + GLOVE_MAX_TEXTURE_IMAGE_UNITS
+#define GLOVE_MAX_COMBINED_TEXTURE_IMAGE_UNITS          (GLOVE_MAX_VERTEX_TEXTURE_IMAGE_UNITS + GLOVE_MAX_TEXTURE_IMAGE_UNITS)
 
 #define GLOVE_MAX_DRAW_BUFFERS                          8     // MIN VALUE:  1
 
