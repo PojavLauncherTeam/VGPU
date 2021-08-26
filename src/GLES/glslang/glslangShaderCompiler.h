@@ -30,6 +30,7 @@
 #include "glslangLinker.h"
 #include "resources/shaderReflection.h"
 #include "glslang/glslang_utils.h"
+#include "SPIRV/disassemble.h"
 
 class GlslangShaderCompiler : public ShaderCompiler {
 private:

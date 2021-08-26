@@ -24,7 +24,7 @@
 #include "platformFactory.h"
 #include "platform/vulkan/vulkanWindowInterface.h"
 #include "platform/vulkan/vulkanResources.h"
-#include "platform/vulkan/WSIXcb.h"
+//#include "platform/vulkan/WSIXcb.h"
 #include "platform/vulkan/WSIPlaneDisplay.h"
 
 PlatformFactory *PlatformFactory::mInstance = nullptr;
@@ -88,12 +88,12 @@ PlatformFactory::GetWindowInterface()
     PlatformType platformType = platformFactory->GetPlatformType();
 
     switch(platformType) {
-        case WSI_XCB: {
+        /*case WSI_XCB: {
             VulkanWindowInterface *windowInterface = new VulkanWindowInterface();
             WSIXcb *vulkanWSI = new WSIXcb();
             windowInterface->SetWSI(vulkanWSI);
             return windowInterface;
-        }
+        }*/
 
         case WSI_ANDROID:
             NOT_IMPLEMENTED();

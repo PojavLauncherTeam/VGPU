@@ -28,9 +28,15 @@
 #include <vulkan/vulkan.h>
 #include "api/eglSurface.h"
 
+
+#include "loader/vk_loader.h"
+
+extern int loaded;
+#define VK_LOAD if(loaded==0){loaded=InitVulkan();}
+
 #define GET_WSI_FUNCTION_PTR(entrypoint)                                                     \
 {                                                                                                        \
-    mWsiCallbacks.fp##entrypoint = (PFN_vk##entrypoint) vkGetInstanceProcAddr(mVkInstance, "vk"#entrypoint);    \
+    mWsiCallbacks.fp##entrypoint = (PFN_vk##entrypoint) vk_GetInstanceProcAddr(mVkInstance, "vk"#entrypoint);    \
     if(mWsiCallbacks.fp##entrypoint == nullptr) {                                                        \
         assert(mWsiCallbacks.fp##entrypoint && "Could not get function pointer to "#entrypoint);         \
         return EGL_FALSE;                                                                                \

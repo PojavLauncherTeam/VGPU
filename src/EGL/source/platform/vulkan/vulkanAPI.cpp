@@ -38,10 +38,13 @@ VulkanAPI::~VulkanAPI()
 EGLBoolean
 VulkanAPI::DoesSupportPresent(const VulkanResources *vkResources)
 {
+    
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
     VkBool32 supportsPresent;
-    vkGetPhysicalDeviceSurfaceSupportKHR(mVkInterface->vkGpus[0], mVkInterface->vkGraphicsQueueNodeIndex, vkResources->GetSurface(), &supportsPresent);
+    vk_GetPhysicalDeviceSurfaceSupportKHR(mVkInterface->vkGpus[0], mVkInterface->vkGraphicsQueueNodeIndex, vkResources->GetSurface(), &supportsPresent);
 
     return (supportsPresent == VK_TRUE) ? EGL_TRUE : EGL_FALSE;
 }
@@ -119,7 +122,7 @@ VulkanAPI::GetPhysicalDevFormats(const VulkanResources *vkResources, uint32_t fo
 {
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VkResult  res = vkGetPhysicalDeviceSurfaceFormatsKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &formatCount, formats);
+    VkResult  res = vk_GetPhysicalDeviceSurfaceFormatsKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &formatCount, formats);
 
     return (VK_SUCCESS == res) ? EGL_TRUE : EGL_FALSE;
 }
@@ -127,11 +130,13 @@ VulkanAPI::GetPhysicalDevFormats(const VulkanResources *vkResources, uint32_t fo
 uint32_t
 VulkanAPI::GetPhysicalDevFormatsCount(const VulkanResources *vkResources)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
     VkResult res;
     uint32_t formatCount = 0;
-    res = vkGetPhysicalDeviceSurfaceFormatsKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &formatCount, NULL);
+    res = vk_GetPhysicalDeviceSurfaceFormatsKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &formatCount, NULL);
 
     return (VK_SUCCESS == res) ? formatCount : 0;
 }
@@ -139,17 +144,21 @@ VulkanAPI::GetPhysicalDevFormatsCount(const VulkanResources *vkResources)
 void
 VulkanAPI::GetPhysicalDevFormatProperties(VkFormat format, VkFormatProperties *formatProperties)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
-    vkGetPhysicalDeviceFormatProperties(mVkInterface->vkGpus[0], format, formatProperties);
+    vk_GetPhysicalDeviceFormatProperties(mVkInterface->vkGpus[0], format, formatProperties);
 }
 
 EGLBoolean
 VulkanAPI::GetPhysicalDevPresentModes(const VulkanResources *vkResources, uint32_t presentModeCount, VkPresentModeKHR *presentModes)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VkResult res = vkGetPhysicalDeviceSurfacePresentModesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &presentModeCount, presentModes);
+    VkResult res = vk_GetPhysicalDeviceSurfacePresentModesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &presentModeCount, presentModes);
 
     return (VK_SUCCESS == res) ? EGL_TRUE : EGL_FALSE;
 }
@@ -157,11 +166,13 @@ VulkanAPI::GetPhysicalDevPresentModes(const VulkanResources *vkResources, uint32
 uint32_t
 VulkanAPI::GetPhysicalDevPresentModesCount(const VulkanResources *vkResources)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
     VkResult res;
     uint32_t presentModeCount = 0;
-    res = vkGetPhysicalDeviceSurfacePresentModesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &presentModeCount, NULL);
+    res = vk_GetPhysicalDeviceSurfacePresentModesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), &presentModeCount, NULL);
 
     return (VK_SUCCESS == res) ? presentModeCount : 0;
 }
@@ -169,9 +180,11 @@ VulkanAPI::GetPhysicalDevPresentModesCount(const VulkanResources *vkResources)
 EGLBoolean
 VulkanAPI::GetPhysicalDevSurfaceCapabilities(const VulkanResources *vkResources, VkSurfaceCapabilitiesKHR *surfCapabilities)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
-    VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), surfCapabilities);
+    VkResult res = vk_GetPhysicalDeviceSurfaceCapabilitiesKHR(mVkInterface->vkGpus[0], vkResources->GetSurface(), surfCapabilities);
 
     return (VK_SUCCESS == res) ? EGL_TRUE : EGL_FALSE;
 }
@@ -223,15 +236,19 @@ VulkanAPI::PresentImage(const VulkanResources *vkResources, uint32_t imageIndex,
 void
 VulkanAPI::DestroySwapchain(const VulkanResources *vkResources)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
-    vkDestroySwapchainKHR(mVkInterface->vkDevice, vkResources->GetSwapchain(), NULL);
+    vk_DestroySwapchainKHR(mVkInterface->vkDevice, vkResources->GetSwapchain(), NULL);
 }
 
 void
 VulkanAPI::DestroyPlatformSurface(const VulkanResources *vkResources)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
-    vkDestroySurfaceKHR(mVkInterface->vkInstance, vkResources->GetSurface(), NULL);
+    vk_DestroySurfaceKHR(mVkInterface->vkInstance, vkResources->GetSurface(), NULL);
 }

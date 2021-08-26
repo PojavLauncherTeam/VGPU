@@ -22,7 +22,7 @@
  */
 
 #include "vulkanWindowInterface.h"
-#include "WSIXcb.h"
+//#include "WSIXcb.h"
 #include "api/eglSurface.h"
 #include "EGL/egl.h"
 #include "rendering_api/rendering_api.h"

@@ -60,7 +60,7 @@ eglGetDisplay(EGLNativeDisplayType display_id)
     FUN_ENTRY(DEBUG_DEPTH);
 
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-    if (display == EGL_DEFAULT_DISPLAY) {
+    if (display_id == EGL_DEFAULT_DISPLAY) {
         EGLDisplay dpy = (EGLDisplay)1;
         return dpy;
     }

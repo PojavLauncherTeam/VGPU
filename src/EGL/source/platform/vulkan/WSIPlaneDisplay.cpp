@@ -26,11 +26,13 @@
 EGLBoolean
 WSIPlaneDisplay::SetSurfaceCallback(void)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
     PFN_vkCreateDisplayPlaneSurfaceKHR fpCreateDisplayPlaneSurfaceKHR = nullptr;
 
-    fpCreateDisplayPlaneSurfaceKHR = (PFN_vkCreateDisplayPlaneSurfaceKHR) vkGetInstanceProcAddr(mVkInstance, "vkCreateDisplayPlaneSurfaceKHR");
+    fpCreateDisplayPlaneSurfaceKHR = (PFN_vkCreateDisplayPlaneSurfaceKHR) vk_GetInstanceProcAddr(mVkInstance, "vkCreateDisplayPlaneSurfaceKHR");
     if(fpCreateDisplayPlaneSurfaceKHR == nullptr) {
         assert(fpCreateDisplayPlaneSurfaceKHR && "Could not get function pointer to CreateDisplayPlaneSurfaceKHR");
         return EGL_FALSE;
@@ -44,6 +46,8 @@ WSIPlaneDisplay::SetSurfaceCallback(void)
 VkSurfaceKHR
 WSIPlaneDisplay::CreateSurface(EGLDisplay dpy, EGLNativeWindowType win, EGLSurface_t *surface)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
     if(!surface) {

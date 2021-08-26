@@ -376,7 +376,7 @@ EGLImageKHR
 DisplayDriver::CreateImageNativeBufferAndroid(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
 {
     FUN_ENTRY(DEBUG_DEPTH);
-
+/*
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     (void)target;
 
@@ -411,9 +411,9 @@ DisplayDriver::CreateImageNativeBufferAndroid(EGLDisplay dpy, EGLContext ctx, EG
     native_buffer->common.incRef(&native_buffer->common);
 
     return (EGLImageKHR)native_buffer;
-#else
+#else*/
     return (EGLImageKHR)EGL_NO_IMAGE_KHR;
-#endif
+//#endif
 }
 
 
@@ -445,7 +445,7 @@ EGLBoolean
 DisplayDriver::DestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
 {
     FUN_ENTRY(DEBUG_DEPTH);
-
+/*
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     if(dpy == EGL_NO_DISPLAY) {
         callingThread->RecordError(EGL_BAD_DISPLAY);
@@ -463,7 +463,7 @@ DisplayDriver::DestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
     native_buffer->common.decRef(&native_buffer->common);
 
     return EGL_TRUE;
-#endif
+#endif*/
     return EGL_FALSE;
 }
 

@@ -7,7 +7,7 @@ else(WIN32)
 endif(WIN32)
 
 set(SOURCES
-    MachineIndependent/glslang.m4
+    MachineIndependent/glslang.y
     MachineIndependent/glslang_tab.cpp
     MachineIndependent/attribute.cpp
     MachineIndependent/Constant.cpp

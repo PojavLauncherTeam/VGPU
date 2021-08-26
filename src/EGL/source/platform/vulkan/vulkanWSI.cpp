@@ -26,6 +26,8 @@
 EGLBoolean
 VulkanWSI::Initialize(const VkInstance vkInstance, const VkDevice vkDevice)
 {
+    VK_LOAD
+    
     FUN_ENTRY(DEBUG_DEPTH);
 
     mVkInstance = vkInstance;
