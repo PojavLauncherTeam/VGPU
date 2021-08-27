@@ -15,12 +15,17 @@
 #include "vk_loader_.h"
 #include "EGL/egl.h"
 #include <dlfcn.h>
+//#include "context_gl/context.h"
 
 int loaded = 0;
 
 int InitVulkan(void) {
     if(loaded) { return loaded; }
-    
+    /*
+    // using context example
+    gles_context_t *ctx = gles_context_t::get();
+    ctx->error = 0;
+    */
     void* libvulkan = dlopen("libvulkan.so", RTLD_NOW | RTLD_LOCAL);
     if (!libvulkan)
         return 0;

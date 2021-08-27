@@ -1,4 +1,4 @@
-#include "context.h"
+
 
 
 #define TLS_SLOT_OPENGL_API         3
@@ -16,7 +16,7 @@
 #error unsupported architecture
 #endif
 
-static inline context_t* getGlThreadSpecific() {
-	return static_cast<context_t*>(__get_tls()[TLS_SLOT_OPENGL]);
-    //return (context_t*)(__get_tls()[TLS_SLOT_OPENGL]);
+static inline void* getGlThreadSpecific() {
+	return static_cast<void*>(__get_tls()[TLS_SLOT_OPENGL]);
+    //return (void*)(__get_tls()[TLS_SLOT_OPENGL]);
 }
