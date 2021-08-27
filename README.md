@@ -7,7 +7,7 @@ GL_EXT_memory_object
 GL_EXT_memory_object_fd.
 (It has not yet been written to the branch.)
 
-The GL implementation will attempt to access the native EGL context.(It has not yet been separated from GLOVE's EGL implementation)
+The GL implementation will attempt to access the native EGL context.(Rough implementation: context_t *ctx = (context_t *)(((unsigned *)__get_tls())[TLS_SLOT_OPENGL]);)
 
 Main Work Flow:
 GL achieves off-screen rendering and saves the results to external image memory.
