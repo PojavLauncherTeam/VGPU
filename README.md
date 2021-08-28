@@ -7,7 +7,11 @@ GL_EXT_memory_object
 GL_EXT_memory_object_fd.
 (It has not yet been written to the branch.)
 
-The GL implementation will attempt to access the native EGL context.(Rough implementation: context_t *ctx = (context_t *)(__get_tls()[TLS_SLOT_OPENGL]);)
+The EGL provided by this library will bind the custom context to a corresponding EGL context,
+which is a surface-independent off-screen rendering context that is not managed by the native EGL.
+In order to be compatible with native EGL,
+all implementations of the EGL API except the GL context manager,
+will directly call the native EGL API.
 
 Main Work Flow:
 GL implementation complete off-screen rendering and saves the results to external image memory.
