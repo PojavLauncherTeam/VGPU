@@ -1,6 +1,5 @@
 
 
-
 extern int drawbuffer_fix(char **, char **, int);
 extern void func_name_conv(char *, char **);
 extern void func_build_in(char **, int, int);
