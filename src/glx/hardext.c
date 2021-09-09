@@ -481,7 +481,9 @@ void GetHardwareExtensions(int notest)
     if(hardext.glsl320es) {
         SHUT_LOGD("GLSL 320 es supported%s\n", hardext.glsl120?"":" and used");
     }
-    
+    //int binary_formats[4] = {0};
+    //gles_glGetIntegerv(GL_SHADER_BINARY_FORMATS, binary_formats);
+    //SHUT_LOGD("gl_shader_binary_formats : %x, %x ", binary_formats[0], binary_formats[1]);
     /*
     if(testMAXdrawbuffers("8")){
     	SHUT_LOGD("GLSL supported MAXdrawbuffers = 8 \n");
