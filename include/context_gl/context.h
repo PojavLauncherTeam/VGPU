@@ -1,9 +1,8 @@
 
 
 
-//#include "get.h"
-#include "gles_ctx/context.h"
-/*
+#include "get.h"
+
 struct gles_context_t {
     context_t               rasterizer;
     array_machine_t         arrays         __attribute__((aligned(32)));
@@ -30,7 +29,6 @@ struct gles_context_t {
     GLenum                  error;
 };
 
-static inline gles_context_t* get() {
+static inline gles_context_t* get_ctx() {
     return (gles_context_t*)getGlThreadSpecific();
 }
-*/
