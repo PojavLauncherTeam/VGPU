@@ -2,13 +2,50 @@ LOCAL_PATH := $(call my-dir)
 
 ###########################
 #
+# EGL shared library
+#
+###########################
+
+include $(CLEAR_VARS)
+
+LOCAL_MODULE:= egl_vk
+LOCAL_CXXFLAGS:=-std=c++11 -fno-exceptions -frtti
+
+LOCAL_CFLAGS += -DVK_USE_PLATFORM_ANDROID_KHR
+
+LOCAL_C_INCLUDES := $(LOCAL_PATH)/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src/EGL/include
+LOCAL_C_INCLUDES += $(LOCAL_PATH)/src/EGL/source
+LOCAL_EXPORT_C_INCLUDES:= $(LOCAL_C_INCLUDES) -DBCMHOST
+
+LOCAL_SRC_FILES:= \
+    src/loader/vk_loader.cpp \
+    src/EGL/source/api/eglContext.cpp \
+    src/EGL/source/api/eglConfig.cpp \
+    src/EGL/source/api/egl.cpp \
+    src/EGL/source/api/eglSurface.cpp \
+    src/EGL/source/display/displayDriver.cpp \
+    src/EGL/source/display/displayDriversContainer.cpp \
+    src/EGL/source/thread/renderingThread.cpp \
+    src/EGL/source/platform/platformFactory.cpp \
+    src/EGL/source/platform/vulkan/WSIPlaneDisplay.cpp \
+    src/EGL/source/platform/vulkan/vulkanWindowInterface.cpp \
+    src/EGL/source/platform/vulkan/vulkanWSI.cpp \
+    src/EGL/source/platform/vulkan/vulkanAPI.cpp \
+    src/EGL/source/rendering_api/rendering_api.c \
+    src/EGL/source/utils/eglLogger.cpp
+
+include $(BUILD_SHARED_LIBRARY)
+
+###########################
+#
 # GL shared library
 #
 ###########################
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := vgpu
+LOCAL_MODULE := vgpu_vk
 
 LOCAL_C_INCLUDES := $(LOCAL_PATH)/glslang/include
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/include
@@ -100,9 +137,6 @@ LOCAL_SHARED_LIBRARIES += HLSL
 LOCAL_SHARED_LIBRARIES += glslang
 LOCAL_SHARED_LIBRARIES += SPIRV
 
-LOCAL_SHARED_LIBRARIES += egl
-
 include $(BUILD_SHARED_LIBRARY)
 
-include $(LOCAL_PATH)/glslang/Android.mk \
-		$(LOCAL_PATH)/src/EGL/source/Android.mk
+include $(LOCAL_PATH)/glslang/Android.mk
