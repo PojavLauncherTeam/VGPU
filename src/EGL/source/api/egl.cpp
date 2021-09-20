@@ -94,6 +94,18 @@ EGLBoolean
 eglGetConfigs (EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config) {
 	CHECK_DISPLAY
 	
+	if (config_size <= 0) {
+		egl_state.error = EGL_BAD_ACCESS;
+		return EGL_FALSE;
+	}
+	if (configs == NULL) {
+		egl_state.error = EGL_BAD_ATTRIBUTE;
+		return EGL_FALSE;
+	}
+	
+	*configs = dpy;
+	*num_config = 1;
+	
 	return EGL_TRUE;
 }
 	
@@ -101,12 +113,33 @@ EGLBoolean
 eglChooseConfig (EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config) {  
 	CHECK_DISPLAY
 	
+	if (config_size <= 0) {
+		egl_state.error = EGL_BAD_ACCESS;
+		return EGL_FALSE;
+	}
+	if (attrib_list == NULL) {
+		egl_state.error = EGL_BAD_ATTRIBUTE;
+		return EGL_FALSE;
+	}
+	if (configs == NULL) {
+		egl_state.error = EGL_BAD_ATTRIBUTE;
+		return EGL_FALSE;
+	}
+	
+	*configs = dpy;
+	*num_config = 1;
+	
 	return EGL_TRUE;
 }
 	
 EGLBoolean  
 eglGetConfigAttrib (EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value) {  
 	CHECK_DISPLAY
+	
+	if (attribute == EGL_SURFACE_TYPE) {
+		*value = EGL_WINDOW_BIT;
+	}
+	*value = EGL_WINDOW_BIT;
 	
 	return EGL_TRUE;
 }
