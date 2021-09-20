@@ -1,193 +1,212 @@
-/**
- * Copyright (C) 2015-2018 Think Silicon S.A. (https://think-silicon.com/)
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public v3
- * License as published by the Free Software Foundation;
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- */
 
-/**
- *  @file       egl.cpp
- *  @author     Think Silicon
- *  @date       25/07/2018
- *  @version    1.0
- *
- *  @brief      Entry points for the EGL API calls
- *
- */
 
-#include "display/displayDriversContainer.h"
-#include "display/displayDriver.h"
-#include "utils/eglLogger.h"
-#include "thread/renderingThread.h"
 
-#ifdef DEBUG_DEPTH
-#   undef DEBUG_DEPTH
-#endif // DEBUG_DEPTH
-#define DEBUG_DEPTH                          EGL_LOG_INFO
+#include "EGL/egl.h"
+#include "utils/auxs.h"
+#include "utils/egl_state.h"
+#include "utils/ctx.h"
 
-static RenderingThread currentThread;
+#include "vulkan/vk_wrapper.h"
 
-#define THREAD_EXEC_RETURN(func)             FUN_ENTRY(DEBUG_DEPTH);                                                        \
-                                             return currentThread.func;
 
-#define DRIVER_EXEC(display, func)           FUN_ENTRY(DEBUG_DEPTH);                                                        \
-                                             DisplayDriver *eglDriver = DisplayDriversContainer::GetDisplayDriver(display); \
-                                             eglDriver->func;
+#define CHECK_DISPLAY \
+	if (dpy != egl_state.display) { \
+		egl_state.error = EGL_BAD_DISPLAY; \
+		return EGL_FALSE; \
+	}
+	
 
-#define DRIVER_EXEC_RETURN(display, func)    FUN_ENTRY(DEBUG_DEPTH);                                                        \
-                                             DisplayDriver *eglDriver = DisplayDriversContainer::GetDisplayDriver(display); \
-                                             return eglDriver ? eglDriver->func : 0;
+/*EGL functions */
 
-static void cleanUpResources()
-{
-    FUN_ENTRY(EGL_LOG_DEBUG);
-
-    if(DisplayDriversContainer::IsEmpty()) {
-        DisplayDriversContainer::Destroy();
-        EGLLogger::Shutdown();
-    }
-}
-
-EGLAPI EGLDisplay EGLAPIENTRY
-eglGetDisplay(EGLNativeDisplayType display_id)
-{
-    FUN_ENTRY(DEBUG_DEPTH);
-
+// ==== Window & Surface
+EGLDisplay  
+eglGetDisplay (EGLNativeDisplayType display) {
+	
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
-    if (display_id == EGL_DEFAULT_DISPLAY) {
-        EGLDisplay dpy = (EGLDisplay)1;
-        return dpy;
+    if (display == EGL_DEFAULT_DISPLAY) {
+    	// create vk instance as the dpy...
+    	CreateInstance(&device.instance_);
+		egl_state.instance = device.instance_;
+		
+        //egl_state.display = (EGLDisplay)0x1;
+        egl_state.display = (EGLDisplay)(egl_state.instance);
+        return egl_state.display;
     }
     return EGL_NO_DISPLAY;
 #else
-    eglDisplay_t *eglDisplay = new eglDisplay_t();
-    if(EGL_DEFAULT_DISPLAY) {
-        eglDisplay->nativeDisplay = XOpenDisplay(NULL);
-    } else {
-        eglDisplay->nativeDisplay = display_id;
-    }
-
-    return static_cast<EGLDisplay>(eglDisplay);
+    return EGL_NO_DISPLAY;
 #endif
 
-    return nullptr;
 }
 
-EGLAPI EGLint EGLAPIENTRY
-eglGetError(void)
-{
-    THREAD_EXEC_RETURN(GetError());
+EGLBoolean  
+eglInitialize (EGLDisplay dpy, EGLint *major, EGLint *minor) {  
+	if (*major<0 || *minor<0) {
+		egl_state.error = EGL_FALSE;
+		egl_state.dpy_init = EGL_FALSE;
+		return EGL_FALSE;
+	}
+	if (dpy != egl_state.display) {
+		egl_state.error = EGL_BAD_DISPLAY;
+		egl_state.dpy_init = EGL_FALSE;
+		return EGL_FALSE;
+	}
+	if (major==NULL || minor==NULL)
+		egl_state.dpy_init = EGL_FALSE;
+	else
+		egl_state.dpy_init = EGL_TRUE;
+	egl_state.error = EGL_TRUE;
+	return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglBindAPI(EGLenum api)
-{
-    THREAD_EXEC_RETURN(BindAPI(api));
+EGLBoolean  
+eglBindAPI (EGLenum api) {  
+	switch (api) {
+		case EGL_OPENGL_API:
+		case EGL_OPENGL_ES_API:		// This only supports the OpenGL/ES API...
+			egl_state.error = EGL_TRUE;
+			return EGL_TRUE;
+		case EGL_OPENVG_API:
+			egl_state.error = EGL_BAD_PARAMETER;
+			return EGL_FALSE;
+	}
+	egl_state.error = EGL_BAD_PARAMETER;
+	return EGL_FALSE;
 }
 
-EGLAPI EGLenum EGLAPIENTRY
-eglQueryAPI(void)
-{
-    THREAD_EXEC_RETURN(QueryAPI());
+EGLSurface  
+eglCreateWindowSurface (EGLDisplay dpy, EGLConfig config, EGLNativeWindowType window, const EGLint *attrib_list) {
+	CHECK_DISPLAY
+	
+	VkSurfaceKHR* surface = (VkSurfaceKHR*)AllocAObject(sizeof(VkSurfaceKHR));
+	// Use dpy as the vk instance...
+	CreateAndroidSurface((VkInstance)dpy, window, surface);
+	//egl_state.surface = surface; 
+	device.surface_ = *surface;
+	
+	// TODO: Alloc a VkSurface...
+	
+	return (EGLSurface) (surface);
+	//return (EGLSurface) (egl_state.surface);
+}
+// ==== Config
+EGLBoolean  
+eglGetConfigs (EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config) {
+	CHECK_DISPLAY
+	
+	return EGL_TRUE;
+}
+	
+EGLBoolean  
+eglChooseConfig (EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config) {  
+	CHECK_DISPLAY
+	
+	return EGL_TRUE;
+}
+	
+EGLBoolean  
+eglGetConfigAttrib (EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value) {  
+	CHECK_DISPLAY
+	
+	return EGL_TRUE;
+}
+	
+// ==== Context
+EGLContext  
+eglCreateContext (EGLDisplay dpy, EGLConfig config, EGLContext share_list, const EGLint *attrib_list) {
+	CHECK_DISPLAY
+	
+	gl_context_t* ctx_ = (gl_context_t*)AllocAObject(sizeof(gl_context_t));
+	// TODO: create a vk device
+	
+	return ctx_;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglWaitClient(void)
-{
-    THREAD_EXEC_RETURN(WaitClient());
+EGLBoolean  
+eglMakeCurrent (EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx_) {
+	CHECK_DISPLAY
+	
+	ctx = (gl_context_t*)ctx_;
+	
+	ctx->EGL_ctx.EGL_resource.instance = (VkInstance)dpy;
+	ctx->EGL_ctx.EGL_resource.surface = (VkSurfaceKHR)draw;
+	
+	// TODO: create a swapchain
+	SET_CTX(ctx);
+	if (ctx)
+		egl_state.bindctx = EGL_TRUE;
+	else
+		egl_state.bindctx = EGL_FALSE;
+	
+	return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglReleaseThread(void)
-{
-    THREAD_EXEC_RETURN(ReleaseThread());
+// ==== SwapBuffer
+EGLBoolean  
+eglSwapBuffers (EGLDisplay dpy, EGLSurface draw) {  
+	GET_CTX
+	CHECK_DISPLAY
+	
+	return EGL_TRUE;
 }
 
-EGLAPI EGLContext EGLAPIENTRY
-eglGetCurrentContext(void)
-{
-    THREAD_EXEC_RETURN(GetCurrentContext());
+EGLBoolean  
+eglSwapInterval (EGLDisplay dpy, EGLint interval) {
+	CHECK_DISPLAY
+	
+	return EGL_TRUE;
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
-eglGetCurrentSurface(EGLint readdraw)
-{
-    THREAD_EXEC_RETURN(GetCurrentSurface(readdraw));
+// ==== Get
+EGLint  
+eglGetError (void) {  
+	return egl_state.error;
 }
 
-EGLAPI EGLDisplay EGLAPIENTRY
-eglGetCurrentDisplay(void)
-{
-    THREAD_EXEC_RETURN(GetCurrentDisplay());
+EGLContext  
+eglGetCurrentContext (void) {
+	GET_CTX
+	
+	if (egl_state.bindctx == EGL_FALSE) {
+		egl_state.error = EGL_BAD_CONTEXT;
+		return EGL_NO_CONTEXT;
+	}
+	
+	return (EGLContext) ctx;
 }
 
-EGLAPI EGLContext EGLAPIENTRY
-eglCreateContext(EGLDisplay dpy, EGLConfig config, EGLContext share_context, const EGLint *attrib_list)
-{
-    THREAD_EXEC_RETURN(CreateContext(dpy, config, share_context, attrib_list));
+EGLSurface  
+eglGetCurrentSurface (EGLint readdraw) {  
+	GET_CTX
+	
+	if (egl_state.bindctx)
+		return (EGLDisplay) (ctx->EGL_ctx.EGL_resource.surface);
+	else
+		return (EGLDisplay) (egl_state.surface);
+	
+	return EGL_NO_SURFACE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglDestroyContext(EGLDisplay dpy, EGLContext ctx)
-{
-    THREAD_EXEC_RETURN(DestroyContext(dpy, ctx));
+EGLDisplay  
+eglGetCurrentDisplay (void) {  
+	GET_CTX
+	
+	if (egl_state.bindctx)
+		return (EGLDisplay) (ctx->EGL_ctx.EGL_resource.instance);
+	else
+		return (EGLDisplay) (egl_state.display);
+	
+	return EGL_NO_DISPLAY;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglMakeCurrent(EGLDisplay dpy, EGLSurface draw, EGLSurface read, EGLContext ctx)
-{
-    DRIVER_EXEC(dpy, SetActiveContext(ctx));
-    THREAD_EXEC_RETURN(MakeCurrent(dpy, draw, read, ctx));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglQueryContext(EGLDisplay dpy, EGLContext ctx, EGLint attribute, EGLint *value)
-{
-    THREAD_EXEC_RETURN(QueryContext(dpy, ctx, attribute, value));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglWaitGL(void)
-{
-    THREAD_EXEC_RETURN(WaitGL());
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglWaitNative(EGLint engine)
-{
-    THREAD_EXEC_RETURN(WaitNative(engine));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglInitialize(EGLDisplay dpy, EGLint *major, EGLint *minor)
-{
-    DRIVER_EXEC_RETURN(dpy, Initialize(dpy, major, minor));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglTerminate(EGLDisplay dpy)
-{
-    DRIVER_EXEC(dpy, Terminate(dpy));
-    DisplayDriversContainer::RemoveDisplayDriver(dpy);
-    cleanUpResources();
-    
-    return EGL_TRUE;
-}
-
-EGLAPI const char * EGLAPIENTRY
+const char *  
 eglQueryString(EGLDisplay dpy, EGLint name)
 {
-    FUN_ENTRY(DEBUG_DEPTH);
-
+    CHECK_DISPLAY
+    
     switch(name) {
-    case EGL_CLIENT_APIS:   return "EGL_OPENGL_ES_API\0"; break;
-    case EGL_VENDOR:        return "GLOVE (GL Over Vulkan)\0"; break;
+    case EGL_CLIENT_APIS:   return "EGL_OPENGL_ES_API EGL_OPENGL_API\0"; break;
+    case EGL_VENDOR:        return "vgpu_vk\0"; break;
     case EGL_VERSION:       return "1.4\0"; break;
 #ifdef VK_USE_PLATFORM_ANDROID_KHR
     case EGL_EXTENSIONS:    return "EGL_KHR_image_base EGL_ANDROID_image_native_buffer\0"; break;
@@ -200,131 +219,51 @@ eglQueryString(EGLDisplay dpy, EGLint name)
     return "\0";
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglGetConfigs(EGLDisplay dpy, EGLConfig *configs, EGLint config_size, EGLint *num_config)
-{
-    DRIVER_EXEC_RETURN(dpy, GetConfigs(dpy, configs, config_size, num_config));
+// ==== Clear
+EGLBoolean  
+eglDestroyContext (EGLDisplay dpy, EGLContext ctx) {  
+	CHECK_DISPLAY
+	
+	egl_state.instance = (VkInstance)dpy;
+	
+	free_all(ctx);
+	SET_CTX(nullptr)
+	egl_state.bindctx = EGL_FALSE;
+	
+	return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglChooseConfig(EGLDisplay dpy, const EGLint *attrib_list, EGLConfig *configs, EGLint config_size, EGLint *num_config)
-{
-    DRIVER_EXEC_RETURN(dpy, ChooseConfig(dpy, attrib_list, configs, config_size, num_config));
+EGLBoolean  
+eglDestroySurface (EGLDisplay dpy, EGLSurface surface) {  
+	GET_CTX
+	CHECK_DISPLAY
+	
+	if (egl_state.bindctx)
+		DestroySurfaceKHR(ctx->EGL_ctx.EGL_resource.instance, ctx->EGL_ctx.EGL_resource.surface);
+	else
+		DestroySurfaceKHR(egl_state.instance, egl_state.surface);
+	
+	return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY
-eglGetConfigAttrib(EGLDisplay dpy, EGLConfig config, EGLint attribute, EGLint *value)
-{
-    DRIVER_EXEC_RETURN(dpy, GetConfigAttrib(dpy, config, attribute, value));
+EGLBoolean  
+eglTerminate (EGLDisplay dpy) {
+	GET_CTX
+	CHECK_DISPLAY
+	
+	if (egl_state.bindctx)
+		DestroyInstance(ctx->EGL_ctx.EGL_resource.instance);
+	else
+		DestroyInstance(egl_state.instance);
+	
+	return EGL_TRUE;
 }
 
-EGLAPI EGLSurface EGLAPIENTRY
-eglCreateWindowSurface(EGLDisplay dpy, EGLConfig config, EGLNativeWindowType win, const EGLint *attrib_list)
-{
-    DRIVER_EXEC_RETURN(dpy, CreateWindowSurface(dpy, config, win, attrib_list));
-}
-
-EGLAPI EGLSurface EGLAPIENTRY
-eglCreatePbufferSurface(EGLDisplay dpy, EGLConfig config, const EGLint *attrib_list)
-{
-    DRIVER_EXEC_RETURN(dpy, CreatePbufferSurface(dpy, config, attrib_list));
-}
-
-EGLAPI EGLSurface EGLAPIENTRY
-eglCreatePixmapSurface(EGLDisplay dpy, EGLConfig config, EGLNativePixmapType pixmap, const EGLint *attrib_list)
-{
-    DRIVER_EXEC_RETURN(dpy, CreatePixmapSurface(dpy, config, pixmap, attrib_list));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
-{
-    DRIVER_EXEC_RETURN(dpy, DestroySurface(dpy, surface));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglQuerySurface(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint *value)
-{
-    DRIVER_EXEC_RETURN(dpy, QuerySurface(dpy, surface, attribute, value));
-}
-
-EGLAPI EGLSurface EGLAPIENTRY
-eglCreatePbufferFromClientBuffer(EGLDisplay dpy, EGLenum buftype, EGLClientBuffer buffer, EGLConfig config, const EGLint *attrib_list)
-{
-    DRIVER_EXEC_RETURN(dpy, CreatePbufferFromClientBuffer(dpy, buftype, buffer, config, attrib_list));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglSurfaceAttrib(EGLDisplay dpy, EGLSurface surface, EGLint attribute, EGLint value)
-{
-    DRIVER_EXEC_RETURN(dpy, SurfaceAttrib(dpy, surface, attribute, value));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglBindTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
-{
-    DRIVER_EXEC_RETURN(dpy, BindTexImage(dpy, surface, buffer));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglReleaseTexImage(EGLDisplay dpy, EGLSurface surface, EGLint buffer)
-{
-    DRIVER_EXEC_RETURN(dpy, ReleaseTexImage(dpy, surface, buffer));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglSwapInterval(EGLDisplay dpy, EGLint interval)
-{
-    DRIVER_EXEC_RETURN(dpy, SwapInterval(dpy, interval));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglSwapBuffers(EGLDisplay dpy, EGLSurface surface)
-{
-    DRIVER_EXEC_RETURN(dpy, SwapBuffers(dpy, surface));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglCopyBuffers(EGLDisplay dpy, EGLSurface surface, EGLNativePixmapType target)
-{
-    DRIVER_EXEC_RETURN(dpy, CopyBuffers(dpy, surface, target));
-}
-
-EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
-eglGetProcAddress(const char *procname)
-{
-    NOT_IMPLEMENTED();
-
-    return NULL;
-}
-
-EGLAPI EGLImageKHR EGLAPIENTRY
-eglCreateImageKHR(EGLDisplay dpy, EGLContext ctx, EGLenum target, EGLClientBuffer buffer, const EGLint *attrib_list)
-{
-    DRIVER_EXEC_RETURN(dpy, CreateImageKHR(dpy, ctx, target, buffer, attrib_list));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglDestroyImageKHR(EGLDisplay dpy, EGLImageKHR image)
-{
-    DRIVER_EXEC_RETURN(dpy, DestroyImageKHR(dpy, image));
-}
-
-//TODO: Implement the KHR_fence_sync extension
-EGLAPI EGLSyncKHR EGLAPIENTRY
-eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint *attrib_list)
-{
-    DRIVER_EXEC_RETURN(dpy, CreateSyncKHR(dpy, type, attrib_list));
-}
-
-EGLAPI EGLBoolean EGLAPIENTRY
-eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
-{
-    DRIVER_EXEC_RETURN(dpy, DestroySyncKHR(dpy, sync));
-}
-
-EGLAPI EGLint EGLAPIENTRY
-eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)
-{
-    DRIVER_EXEC_RETURN(dpy, ClientWaitSyncKHR(dpy, sync, flags, timeout));
+EGLBoolean  
+eglReleaseThread (void) {
+	GET_CTX
+	
+	//clear_all_ctx(ctx);
+	
+	return EGL_TRUE;
 }

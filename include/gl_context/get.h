@@ -16,6 +16,11 @@
 #error unsupported architecture
 #endif
 
+static inline void setGlThreadSpecific(void* ptr) {
+	(__get_tls()[TLS_SLOT_OPENGL]) = ptr;
+    //return (void*)(__get_tls()[TLS_SLOT_OPENGL]);
+}
+
 static inline void* getGlThreadSpecific() {
 	return static_cast<void*>(__get_tls()[TLS_SLOT_OPENGL]);
     //return (void*)(__get_tls()[TLS_SLOT_OPENGL]);
