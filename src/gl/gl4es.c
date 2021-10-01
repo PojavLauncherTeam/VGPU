@@ -1061,10 +1061,10 @@ void gl4es_glShadeModel(GLenum mode) {
         return;
     glstate->shademodel = mode;
     LOAD_GLES2(glShadeModel);
-    if(gles_glShadeModel) {
+    /*if(gles_glShadeModel) {
         errorGL();
         gles_glShadeModel(mode);
-    }
+    }*/
 }
 void glShadeModel(GLenum mode) AliasExport("gl4es_glShadeModel");
 
@@ -1099,10 +1099,10 @@ void gl4es_glLogicOp(GLenum opcode) {
     // TODO: test if opcode is valid
     glstate->logicop = opcode;
     LOAD_GLES2(glLogicOp);
-    if(gles_glLogicOp) {
+    /*if(gles_glLogicOp) {
         errorGL();
         gles_glLogicOp(opcode);
-    }
+    }*/
 }
 //void glLogicOp(GLenum opcode) AliasExport("gl4es_glLogicOp");
 

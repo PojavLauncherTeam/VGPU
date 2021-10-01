@@ -30,7 +30,7 @@ void gl4es_Stub(void *x, ...) {
 void *gl4es_GetProcAddress(const char *name) {
     DBG(printf("glGetProcAddress(\"%s\")", name);)
     
-    #include "pack/pack1.h"
+    #include "pack/packEX.h"
     
     // generated gles wrappers
     #include "glesfuncs.inc"
