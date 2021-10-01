@@ -6,8 +6,8 @@
 #include "Initialization.h"
 
 int loaded = 0;
-const char *LIB_GLES_NAME = "libGLESv2_angle.so";
-const char *LIB_EGL_NAME = "libEGL_angle.so";
+const char *LIB_GLES_NAME = "libGLESv2.so";
+const char *LIB_EGL_NAME = "libEGL.so";
 
 void load_all(void){
 	
