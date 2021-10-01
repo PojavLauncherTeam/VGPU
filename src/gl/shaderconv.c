@@ -514,7 +514,7 @@ char* ConvertShader(const char* pEntry, int isVertex, shaderconv_need_t *need)
     headline++;
   }
   
-  LOAD_GLES(glGetIntegerv);
+  LOAD_GLES_(glGetIntegerv);
   gles_glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &hardext.maxcolorattach);
   gles_glGetIntegerv(GL_MAX_DRAW_BUFFERS_ARB, &hardext.maxdrawbuffers);
   

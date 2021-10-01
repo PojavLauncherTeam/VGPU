@@ -1,7 +1,8 @@
-#include "pack.h"
+#include "Initialization.h"
+#include "load.h"
+//#include "pack.h"
 
 
-void Initialization_(void);
 int MaxDrawBuffers;
 int MaxColorAttachs;
 const float ClearColorValue[4] = {0.0, 0.0, 0.0, 0.0};
@@ -16,3 +17,13 @@ const GLenum Attachs[8] = {
 	GL_COLOR_ATTACHMENT6,
 	GL_COLOR_ATTACHMENT7
 };
+
+
+void Initialization_(void){
+	_LOAD_GLES
+	
+	gles_glGetIntegerv(GL_MAX_DRAW_BUFFERS, &MaxDrawBuffers);
+	gles_glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &MaxColorAttachs);
+	
+	return;
+}

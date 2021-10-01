@@ -1,8 +1,9 @@
 // OpenGL 2.0 >> 3.0
 
-#include "load_.h"
+#include "load.h"
 #include "pack.h"
 #include "pack_.h"
+#include "Initialization.h"
 //#include "toext.h"
 
 
@@ -10,11 +11,12 @@
 #include <stdio.h>
 #include <android/log.h>
 
-#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
+//#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
+#define Printf(...) printf(__VA_ARGS__)
 
-int loaded = 0;
+//int loaded = 0;
 
-#define _LOAD_GLES if(loaded == 0){load_all();loaded = 1;}
+//#define _LOAD_GLES if(loaded == 0){loaded=load_all();}
 
 //int count=0;
 //int num = 700;
@@ -95,7 +97,7 @@ void glTexImage2D (GLenum target, GLint level, GLint internalformat, GLsizei wid
 }
 
 void glDrawBuffer (GLenum buf){    _LOAD_GLES    
- _gles_glDrawBuffers (1, (const GLenum *)(&buf));
+ gles_glDrawBuffers (1, (const GLenum *)(&buf));
 
 }
 
@@ -111,28 +113,29 @@ void glClear (GLbitfield mask){    _LOAD_GLES
   count=0;
  }*/
  
- if((mask&GL_COLOR_BUFFER_BIT)!=0){
-    _gles_glDrawBuffers(MaxDrawBuffers, (const GLenum *)Attachs);
+ //if((mask&GL_COLOR_BUFFER_BIT)!=0){
+ if(mask==GL_COLOR_BUFFER_BIT){
+    gles_glDrawBuffers(MaxDrawBuffers, (const GLenum *)Attachs);
     for(int n=1; n<MaxDrawBuffers; n++){
-    	_gles_glClearBufferfv(GL_COLOR, n, (const float *)ClearColorValue);
+    	gles_glClearBufferfv(GL_COLOR, n, (const float *)ClearColorValue);
     }
  }
-  _gles_glClear (mask);
+  gles_glClear (mask);
 //====
 }
 
 void glClearColor (GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha){    _LOAD_GLES    
- _gles_glClearColor (red, green, blue, alpha);
+ gles_glClearColor (red, green, blue, alpha);
 //====
 }
 
 void glClearStencil (GLint s){    _LOAD_GLES    
- _gles_glClearStencil (s);
+ gles_glClearStencil (s);
 //====
 }
 
 void glClearDepth (GLdouble depth){    _LOAD_GLES    
- _gles_glClearDepthf ((GLfloat)depth);
+ gles_glClearDepthf ((GLfloat)depth);
 //====pack
 }
 
@@ -244,7 +247,7 @@ void glGetIntegerv (GLenum pname, GLint *data){    _LOAD_GLES
 const GLubyte *glGetString (GLenum name){    _LOAD_GLES    
  
  if(name == GL_RENDERER){
-  return (const GLubyte *)"vgpu 1.3.6";
+  return (const GLubyte *)"vgpu 1.3.68";
  }
  if(name == GL_VERSION){
   return (const GLubyte *)"3.0";
@@ -253,10 +256,10 @@ const GLubyte *glGetString (GLenum name){    _LOAD_GLES
   return (const GLubyte *)"vgpu";
  }
  if(name == GL_SHADING_LANGUAGE_VERSION){
-  return (const GLubyte *)"1.30";
+  return (const GLubyte *)"130";
  }
  
- return _gles_glGetString (name);
+ return gles_glGetString (name);
 
 }
 
@@ -609,7 +612,7 @@ void glDrawBuffers (GLsizei n, const GLenum *bufs){    _LOAD_GLES
   count=0;
  }
 */
- _gles_glDrawBuffers (n, bufs);
+ gles_glDrawBuffers (n, bufs);
 
 }
 
@@ -1130,32 +1133,32 @@ void glVertexAttribPointer (GLuint index, GLint size, GLenum type, GLboolean nor
 
 // GL_VERSION_2_1
 void glUniformMatrix2x3fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value){    _LOAD_GLES    
- _gles_glUniformMatrix2x3fv (location, count, transpose, value);
+ gles_glUniformMatrix2x3fv (location, count, transpose, value);
 
 }
 
 void glUniformMatrix3x2fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value){    _LOAD_GLES    
- _gles_glUniformMatrix3x2fv (location, count, transpose, value);
+ gles_glUniformMatrix3x2fv (location, count, transpose, value);
 
 }
 
 void glUniformMatrix2x4fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value){    _LOAD_GLES    
- _gles_glUniformMatrix2x4fv (location, count, transpose, value);
+ gles_glUniformMatrix2x4fv (location, count, transpose, value);
 
 }
 
 void glUniformMatrix4x2fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value){    _LOAD_GLES    
- _gles_glUniformMatrix4x2fv (location, count, transpose, value);
+ gles_glUniformMatrix4x2fv (location, count, transpose, value);
 
 }
 
 void glUniformMatrix3x4fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value){    _LOAD_GLES    
- _gles_glUniformMatrix3x4fv (location, count, transpose, value);
+ gles_glUniformMatrix3x4fv (location, count, transpose, value);
 
 }
 
 void glUniformMatrix4x3fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value){    _LOAD_GLES    
- _gles_glUniformMatrix4x3fv (location, count, transpose, value);
+ gles_glUniformMatrix4x3fv (location, count, transpose, value);
 
 }
 
@@ -1163,62 +1166,62 @@ void glUniformMatrix4x3fv (GLint location, GLsizei count, GLboolean transpose, c
 
 // GL_VERSION_3_0
 void glColorMaski (GLuint index, GLboolean r, GLboolean g, GLboolean b, GLboolean a){    _LOAD_GLES    
- _gles_glColorMaski (index, r, g, b, a);
+ gles_glColorMaski (index, r, g, b, a);
 
 }
 
 void glGetBooleani_v (GLenum target, GLuint index, GLboolean *data){    _LOAD_GLES    
- _gles_glGetBooleani_v (target, index, data);
+ gles_glGetBooleani_v (target, index, data);
 
 }
 
 void glGetIntegeri_v (GLenum target, GLuint index, GLint *data){    _LOAD_GLES    
- _gles_glGetIntegeri_v (target, index, data);
+ gles_glGetIntegeri_v (target, index, data);
 
 }
 
 void glEnablei (GLenum target, GLuint index){    _LOAD_GLES    
- _gles_glEnablei (target, index);
+ gles_glEnablei (target, index);
 
 }
 
 void glDisablei (GLenum target, GLuint index){    _LOAD_GLES    
- _gles_glDisablei (target, index);
+ gles_glDisablei (target, index);
 
 }
 
 GLboolean glIsEnabledi (GLenum target, GLuint index){    _LOAD_GLES    
- return _gles_glIsEnabledi (target, index);
+ return gles_glIsEnabledi (target, index);
 
 }
 
 void glBeginTransformFeedback (GLenum primitiveMode){    _LOAD_GLES    
- _gles_glBeginTransformFeedback (primitiveMode);
+ gles_glBeginTransformFeedback (primitiveMode);
 
 }
 
 void glEndTransformFeedback (void){    _LOAD_GLES    
- _gles_glEndTransformFeedback ();
+ gles_glEndTransformFeedback ();
 
 }
 
 void glBindBufferRange (GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size){    _LOAD_GLES    
- _gles_glBindBufferRange (target, index, buffer, offset, size);
+ gles_glBindBufferRange (target, index, buffer, offset, size);
 
 }
 
 void glBindBufferBase (GLenum target, GLuint index, GLuint buffer){    _LOAD_GLES    
- _gles_glBindBufferBase (target, index, buffer);
+ gles_glBindBufferBase (target, index, buffer);
 
 }
 
 void glTransformFeedbackVaryings (GLuint program, GLsizei count, const GLchar *const*varyings, GLenum bufferMode){    _LOAD_GLES    
- _gles_glTransformFeedbackVaryings (program, count, varyings, bufferMode);
+ gles_glTransformFeedbackVaryings (program, count, varyings, bufferMode);
 
 }
 
 void glGetTransformFeedbackVarying (GLuint program, GLuint index, GLsizei bufSize, GLsizei *length, GLsizei *size, GLenum *type, GLchar *name){    _LOAD_GLES    
- _gles_glGetTransformFeedbackVarying (program, index, bufSize, length, size, type, name);
+ gles_glGetTransformFeedbackVarying (program, index, bufSize, length, size, type, name);
 
 }
 
@@ -1228,224 +1231,287 @@ void glClampColor (GLenum target, GLenum clamp){    _LOAD_GLES
 }
 
 void glBeginConditionalRender (GLuint id, GLenum mode){    _LOAD_GLES    
-;// _gles_glBeginConditionalRender (id, mode);
+;// gles_glBeginConditionalRender (id, mode);
 
 }
 
 void glEndConditionalRender (void){    _LOAD_GLES    
-;// _gles_glEndConditionalRender ();
+;// gles_glEndConditionalRender ();
 
 }
 
 void glVertexAttribIPointer (GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer){    _LOAD_GLES    
- _gles_glVertexAttribIPointer (index, size, type, stride, pointer);				// Direct conversion to int.
+ gles_glVertexAttribIPointer (index, size, type, stride, pointer);				// Direct conversion to int.
 
 }
 
 void glGetVertexAttribIiv (GLuint index, GLenum pname, GLint *params){    _LOAD_GLES    
- _gles_glGetVertexAttribIiv (index, pname, params);
+ gles_glGetVertexAttribIiv (index, pname, params);
 
 }
 
 void glGetVertexAttribIuiv (GLuint index, GLenum pname, GLuint *params){    _LOAD_GLES    
- _gles_glGetVertexAttribIuiv (index, pname, params);
+ gles_glGetVertexAttribIuiv (index, pname, params);
 
 }
 
 void glVertexAttribI1i (GLuint index, GLint x){    _LOAD_GLES    
- _gles_glVertexAttribI4i (index, x, 0, 0, 1);
+ gles_glVertexAttribI4i (index, x, 0, 0, 1);
 
 }
 
 void glVertexAttribI2i (GLuint index, GLint x, GLint y){    _LOAD_GLES    
- _gles_glVertexAttribI4i (index, x, y, 0, 1);
+ gles_glVertexAttribI4i (index, x, y, 0, 1);
 
 }
 
 void glVertexAttribI3i (GLuint index, GLint x, GLint y, GLint z){    _LOAD_GLES    
- _gles_glVertexAttribI4i (index, x, y, z, 1);
+ gles_glVertexAttribI4i (index, x, y, z, 1);
 
 }
 
 void glVertexAttribI4i (GLuint index, GLint x, GLint y, GLint z, GLint w){    _LOAD_GLES    
- _gles_glVertexAttribI4i (index, x, y, z, w);
+ gles_glVertexAttribI4i (index, x, y, z, w);
 
 }
 
 void glVertexAttribI1ui (GLuint index, GLuint x){    _LOAD_GLES    
- _gles_glVertexAttribI4ui (index, x, 0, 0, 1);
+ gles_glVertexAttribI4ui (index, x, 0, 0, 1);
 
 }
 
 void glVertexAttribI2ui (GLuint index, GLuint x, GLuint y){    _LOAD_GLES    
- _gles_glVertexAttribI4ui (index, x, y, 0, 1);
+ gles_glVertexAttribI4ui (index, x, y, 0, 1);
 
 }
 
 void glVertexAttribI3ui (GLuint index, GLuint x, GLuint y, GLuint z){    _LOAD_GLES    
- _gles_glVertexAttribI4ui (index, x, y, z, 1);
+ gles_glVertexAttribI4ui (index, x, y, z, 1);
 
 }
 
 void glVertexAttribI4ui (GLuint index, GLuint x, GLuint y, GLuint z, GLuint w){    _LOAD_GLES    
- _gles_glVertexAttribI4ui (index, x, y, z, w);
+ gles_glVertexAttribI4ui (index, x, y, z, w);
 
 }
 
 void glVertexAttribI1iv (GLuint index, const GLint *v){    _LOAD_GLES    
  const GLint v1[4] = {v[0], 0, 0, 1};
- _gles_glVertexAttribI4iv (index, v1);
+ gles_glVertexAttribI4iv (index, v1);
 
 }
 
 void glVertexAttribI2iv (GLuint index, const GLint *v){    _LOAD_GLES    
  const GLint v1[4] = {v[0], v[1], 0, 1};
- _gles_glVertexAttribI4iv (index, v1);
+ gles_glVertexAttribI4iv (index, v1);
 }
 
 void glVertexAttribI3iv (GLuint index, const GLint *v){    _LOAD_GLES    
  const GLint v1[4] = {v[0], v[1], v[2], 1};
- _gles_glVertexAttribI4iv (index, v1);
+ gles_glVertexAttribI4iv (index, v1);
 
 }
 
 void glVertexAttribI4iv (GLuint index, const GLint *v){    _LOAD_GLES    
- _gles_glVertexAttribI4iv (index, v);
+ gles_glVertexAttribI4iv (index, v);
 
 }
 
 void glVertexAttribI1uiv (GLuint index, const GLuint *v){    _LOAD_GLES    
  const GLuint v1[4] = {v[0], 0, 0, 1};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glVertexAttribI2uiv (GLuint index, const GLuint *v){    _LOAD_GLES    
  const GLuint v1[4] = {v[0], v[1], 0, 1};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glVertexAttribI3uiv (GLuint index, const GLuint *v){    _LOAD_GLES    
  const GLuint v1[4] = {v[0], v[1], v[2], 1};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glVertexAttribI4uiv (GLuint index, const GLuint *v){    _LOAD_GLES    
- _gles_glVertexAttribI4uiv (index, v);
+ gles_glVertexAttribI4uiv (index, v);
 
 }
 
 void glVertexAttribI4bv (GLuint index, const GLbyte *v){    _LOAD_GLES    
  const GLuint v1[4] = {(GLuint)v[0], (GLuint)v[1], (GLuint)v[3], (GLuint)v[3]};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glVertexAttribI4sv (GLuint index, const GLshort *v){    _LOAD_GLES    
  const GLuint v1[4] = {(GLuint)v[0], (GLuint)v[1], (GLuint)v[2], (GLuint)v[3]};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glVertexAttribI4ubv (GLuint index, const GLubyte *v){    _LOAD_GLES    
  const GLuint v1[4] = {(GLuint)v[0], (GLuint)v[1], (GLuint)v[2], (GLuint)v[3]};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glVertexAttribI4usv (GLuint index, const GLushort *v){    _LOAD_GLES    
  const GLuint v1[4] = {(GLuint)v[0], (GLuint)v[1], (GLuint)v[2], (GLuint)v[3]};
- _gles_glVertexAttribI4uiv (index, v1);
+ gles_glVertexAttribI4uiv (index, v1);
 }
 
 void glGetUniformuiv (GLuint program, GLint location, GLuint *params){    _LOAD_GLES    
- _gles_glGetUniformuiv (program, location, params);
+ gles_glGetUniformuiv (program, location, params);
 
 }
 
 void glBindFragDataLocation (GLuint program, GLuint color, const GLchar *name){    _LOAD_GLES    
-;// _gles_glBindFragDataLocation (program, color, name);
+;// gles_glBindFragDataLocation (program, color, name);
 
 }
 
 GLint glGetFragDataLocation (GLuint program, const GLchar *name){    _LOAD_GLES    
- return _gles_glGetFragDataLocation (program, name);
+ return gles_glGetFragDataLocation (program, name);
 
 }
 
 void glUniform1ui (GLint location, GLuint v0){    _LOAD_GLES    
- _gles_glUniform1ui (location, v0);
+ gles_glUniform1ui (location, v0);
 
 }
 
 void glUniform2ui (GLint location, GLuint v0, GLuint v1){    _LOAD_GLES    
- _gles_glUniform2ui (location, v0, v1);
+ gles_glUniform2ui (location, v0, v1);
 
 }
 
 void glUniform3ui (GLint location, GLuint v0, GLuint v1, GLuint v2){    _LOAD_GLES    
- _gles_glUniform3ui (location, v0, v1, v2);
+ gles_glUniform3ui (location, v0, v1, v2);
 
 }
 
 void glUniform4ui (GLint location, GLuint v0, GLuint v1, GLuint v2, GLuint v3){    _LOAD_GLES    
- _gles_glUniform4ui (location, v0, v1, v2, v3);
+ gles_glUniform4ui (location, v0, v1, v2, v3);
 
 }
 
 void glUniform1uiv (GLint location, GLsizei count, const GLuint *value){    _LOAD_GLES    
- _gles_glUniform1uiv (location, count, value);
+ gles_glUniform1uiv (location, count, value);
 
 }
 
 void glUniform2uiv (GLint location, GLsizei count, const GLuint *value){    _LOAD_GLES    
- _gles_glUniform2uiv (location, count, value);
+ gles_glUniform2uiv (location, count, value);
 
 }
 
 void glUniform3uiv (GLint location, GLsizei count, const GLuint *value){    _LOAD_GLES    
- _gles_glUniform3uiv (location, count, value);
+ gles_glUniform3uiv (location, count, value);
 
 }
 
 void glUniform4uiv (GLint location, GLsizei count, const GLuint *value){    _LOAD_GLES    
- _gles_glUniform4uiv (location, count, value);
+ gles_glUniform4uiv (location, count, value);
 
 }
 
 void glTexParameterIiv (GLenum target, GLenum pname, const GLint *params){    _LOAD_GLES    
- _gles_glTexParameterIiv (target, pname, params);
+ gles_glTexParameterIiv (target, pname, params);
 
 }
 
 void glTexParameterIuiv (GLenum target, GLenum pname, const GLuint *params){    _LOAD_GLES    
- _gles_glTexParameterIuiv (target, pname, params);
+ gles_glTexParameterIuiv (target, pname, params);
 
 }
 
 void glGetTexParameterIiv (GLenum target, GLenum pname, GLint *params){    _LOAD_GLES    
- _gles_glGetTexParameterIiv (target, pname, params);
+ gles_glGetTexParameterIiv (target, pname, params);
 
 }
 
 void glGetTexParameterIuiv (GLenum target, GLenum pname, GLuint *params){    _LOAD_GLES    
- _gles_glGetTexParameterIuiv (target, pname, params);
+ gles_glGetTexParameterIuiv (target, pname, params);
 
 }
 
 void glClearBufferiv (GLenum buffer, GLint drawbuffer, const GLint *value){    _LOAD_GLES    
- _gles_glClearBufferiv (buffer, drawbuffer, value);
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferiv()\n");
+ gles_glClearBufferiv (buffer, drawbuffer, value);
 //====
 }
 
 void glClearBufferuiv (GLenum buffer, GLint drawbuffer, const GLuint *value){    _LOAD_GLES    
- _gles_glClearBufferuiv (buffer, drawbuffer, value);
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferuiv()\n");
+ gles_glClearBufferuiv (buffer, drawbuffer, value);
 //====
 }
 
 void glClearBufferfv (GLenum buffer, GLint drawbuffer, const GLfloat *value){    _LOAD_GLES    
- _gles_glClearBufferfv (buffer, drawbuffer, value);
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferfv()\n");
+ gles_glClearBufferfv (buffer, drawbuffer, value);
 //====
 }
 
 void glClearBufferfi (GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil){    _LOAD_GLES    
- _gles_glClearBufferfi (buffer, drawbuffer, depth, stencil);
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferfi()\n");
+ gles_glClearBufferfi (buffer, drawbuffer, depth, stencil);
+//====
+}
+
+void glClearBufferivARB (GLenum buffer, GLint drawbuffer, const GLint *value){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferiv()\n");
+ gles_glClearBufferiv (buffer, drawbuffer, value);
+//====
+}
+
+void glClearBufferuivARB (GLenum buffer, GLint drawbuffer, const GLuint *value){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferuiv()\n");
+ gles_glClearBufferuiv (buffer, drawbuffer, value);
+//====
+}
+
+void glClearBufferfvARB (GLenum buffer, GLint drawbuffer, const GLfloat *value){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferfv()\n");
+ gles_glClearBufferfv (buffer, drawbuffer, value);
+//====
+}
+
+void glClearBufferfiARB (GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferfi()\n");
+ gles_glClearBufferfi (buffer, drawbuffer, depth, stencil);
+//====
+}
+void glClearBufferivEXT (GLenum buffer, GLint drawbuffer, const GLint *value){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferiv()\n");
+ gles_glClearBufferiv (buffer, drawbuffer, value);
+//====
+}
+
+void glClearBufferuivEXT (GLenum buffer, GLint drawbuffer, const GLuint *value){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferuiv()\n");
+ gles_glClearBufferuiv (buffer, drawbuffer, value);
+//====
+}
+
+void glClearBufferfvEXT (GLenum buffer, GLint drawbuffer, const GLfloat *value){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferfv()\n");
+ gles_glClearBufferfv (buffer, drawbuffer, value);
+//====
+}
+
+void glClearBufferfiEXT (GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil){    _LOAD_GLES    
+ gles_glDrawBuffers(1, (const GLenum *)(Attachs+drawbuffer));
+ Printf("VGPU: Calling glClearBufferfi()\n");
+ gles_glClearBufferfi (buffer, drawbuffer, depth, stencil);
 //====
 }
 
@@ -1523,7 +1589,7 @@ void glFramebufferTexture2D (GLenum target, GLenum attachment, GLenum textarget,
   count=0;
  }
 */
- _gles_glFramebufferTexture2D (target, attachment, textarget, texture, level);
+ gles_glFramebufferTexture2D (target, attachment, textarget, texture, level);
 
 }
 
@@ -1533,12 +1599,12 @@ void glFramebufferTexture3D (GLenum target, GLenum attachment, GLenum textarget,
 }
 
 void glFramebufferRenderbuffer (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer){    _LOAD_GLES    
- _gles_glFramebufferRenderbuffer (target, attachment, renderbuffertarget, renderbuffer);
+ gles_glFramebufferRenderbuffer (target, attachment, renderbuffertarget, renderbuffer);
 
 }
 
 void glGetFramebufferAttachmentParameteriv (GLenum target, GLenum attachment, GLenum pname, GLint *params){    _LOAD_GLES    
- _gles_glGetFramebufferAttachmentParameteriv (target, attachment, pname, params);
+ gles_glGetFramebufferAttachmentParameteriv (target, attachment, pname, params);
 
 }
 
@@ -1558,7 +1624,7 @@ void glRenderbufferStorageMultisample (GLenum target, GLsizei samples, GLenum in
 }
 
 void glFramebufferTextureLayer (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer){    _LOAD_GLES    
- _gles_glFramebufferTextureLayer (target, attachment, texture, level, layer);
+ gles_glFramebufferTextureLayer (target, attachment, texture, level, layer);
 
 }
 
