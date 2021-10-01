@@ -6,23 +6,26 @@
 #include "Initialization.h"
 
 int loaded = 0;
+const char *LIB_GLES_NAME = "libGLESv2_angle.so";
+const char *LIB_EGL_NAME = "libEGL_angle.so";
 
 void load_all(void){
 	
 	printf("VGPU: Calling load_all()\n");
 	loaded++;
-	printf("VGPU: loaded = %d\n", loaded);
+	if(loaded)
+	printf("VGPU: loaded succeed\n");
 	
 	void* libGL;
 	char* gles_ = getenv("LIBGL_GLES");
 	int flags = RTLD_LOCAL | RTLD_NOW;
 	
-	libGL = dlopen("libGLESv3.so", flags);
-	if(libGL == NULL)
+	libGL = dlopen(LIB_GLES_NAME, flags);
+	/*if(libGL == NULL)
 		libGL = dlopen("libGLESv2.so", flags);
-	
+	*/
 	if(libGL == NULL) {
-		printf("VGPU: load_all(): failed to dlopen \"libGLESv2.so\" \n");
+		printf("VGPU: load_all(): failed to dlopen \"%s\" \n", LIB_GLES_NAME);
 		loaded = 0;
 		return;
 	}
