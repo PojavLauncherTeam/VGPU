@@ -6,9 +6,10 @@
 GLESAPI_P int loaded;
 
 GLESAPI_P void load_all(void);
+GLESAPI_P const char *LIB_GLES_NAME;
+GLESAPI_P const char *LIB_EGL_NAME;
 
 #define _LOAD_GLES if(loaded == 0){load_all();loaded++;}
-
 #define LOAD_GLES_(name) _LOAD_GLES
 #define LOAD_GLES2_(name) _LOAD_GLES
 

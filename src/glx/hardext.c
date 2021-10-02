@@ -188,7 +188,7 @@ void GetHardwareExtensions(int notest)
 
     // Create a PBuffer first...
     EGLint egl_context_attrib_es2[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 3,
+        EGL_CONTEXT_CLIENT_VERSION, 2,
         EGL_NONE
     };
 
@@ -220,7 +220,7 @@ void GetHardwareExtensions(int notest)
         EGL_ALPHA_SIZE, 8,
 #endif
         EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, (hardext.esversion==1)?EGL_OPENGL_ES2_BIT:EGL_OPENGL_ES3_BIT,
+        EGL_RENDERABLE_TYPE, (hardext.esversion==1)?EGL_OPENGL_ES_BIT:EGL_OPENGL_ES2_BIT,
         EGL_NONE
     };
 
@@ -267,7 +267,7 @@ void GetHardwareExtensions(int notest)
         egl_eglTerminate(eglDisplay);
         return;
     }
-    eglContext = egl_eglCreateContext(eglDisplay, pbufConfigs[0], EGL_NO_CONTEXT, (hardext.esversion==1)?egl_context_attrib:egl_context_attrib_es2);
+    eglContext = egl_eglCreateContext(eglDisplay, pbufConfigs[0], EGL_NO_CONTEXT, egl_context_attrib_es2);
     if(!eglContext) {
         SHUT_LOGE("Error while gathering supported extension (eglCreateContext: %s), default to none\n", PrintEGLError(0));
         return;
@@ -459,6 +459,8 @@ void GetHardwareExtensions(int notest)
         hardext.vendor = VEND_ARM;
     else if(strstr(vendor, "Imagination Technologies"))
         hardext.vendor = VEND_IMGTEC;
+    
+    printf("VGPU: Begin testGLSL\n");
     if(hardext.esversion>1) {
         if(testGLSL("#version 120", 1))
             hardext.glsl120 = 1;
@@ -481,6 +483,8 @@ void GetHardwareExtensions(int notest)
     if(hardext.glsl320es) {
         SHUT_LOGD("GLSL 320 es supported%s\n", hardext.glsl120?"":" and used");
     }
+    
+    printf("VGPU: End testGLSL\n");
     
     /*
     if(testMAXdrawbuffers("8")){
@@ -508,13 +512,17 @@ void GetHardwareExtensions(int notest)
         SHUT_LOGD("EGLImage to RenderBuffer supported\n");
         hardext.khr_renderbuffer = 1;
     }
-
+	
+	
+    printf("VGPU: Begin cleanup EGL\n");
     // End, cleanup
+    int pot;
     egl_eglMakeCurrent(eglDisplay, 0, 0, EGL_NO_CONTEXT);
-    egl_eglDestroySurface(eglDisplay, eglSurface);
-    egl_eglDestroyContext(eglDisplay, eglContext);
-
-    egl_eglTerminate(eglDisplay);
+    pot= egl_eglDestroySurface(eglDisplay, eglSurface);
+    pot= egl_eglDestroyContext(eglDisplay, eglContext);
+    printf("VGPU: End cleanup EGL\n");
+    pot= egl_eglTerminate(eglDisplay);
+    printf("VGPU: End2 cleanup EGL\n");
     
 #endif
 }
