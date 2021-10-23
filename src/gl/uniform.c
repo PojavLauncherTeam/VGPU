@@ -192,10 +192,10 @@ void GoUniformfv(program_t *glprogram, GLint location, int size, int count, cons
     }
     // update uniform
     memcpy(glprogram->cache.cache + m->cache_offs, value, rsize);
-    LOAD_GLES2_(glUniform1fv);
-    LOAD_GLES2_(glUniform2fv);
-    LOAD_GLES2_(glUniform3fv);
-    LOAD_GLES2_(glUniform4fv);
+    LOAD_GLES2(glUniform1fv);
+    LOAD_GLES2(glUniform2fv);
+    LOAD_GLES2(glUniform3fv);
+    LOAD_GLES2(glUniform4fv);
     if(gles_glUniform1fv) {
         switch (size) {
             case 1: gles_glUniform1fv(m->id, count, value); break;
@@ -240,10 +240,10 @@ void GoUniformiv(program_t *glprogram, GLint location, int size, int count, cons
     DBG(printf("Uniform updated, cache=%p(%d/%d), offset=%p, size=%d\n", glprogram->cache.cache, glprogram->cache.size, glprogram->cache.cap, m->cache_offs, rsize);)
     // update uniform
     memcpy(glprogram->cache.cache + m->cache_offs, value, rsize);
-    LOAD_GLES2_(glUniform1iv);
-    LOAD_GLES2_(glUniform2iv);
-    LOAD_GLES2_(glUniform3iv);
-    LOAD_GLES2_(glUniform4iv);
+    LOAD_GLES2(glUniform1iv);
+    LOAD_GLES2(glUniform2iv);
+    LOAD_GLES2(glUniform3iv);
+    LOAD_GLES2(glUniform4iv);
     if(gles_glUniform1iv) {
         switch (size) {
             case 1: gles_glUniform1iv(m->id, count, value); break;
@@ -562,7 +562,7 @@ void GoUniformMatrix2fv(program_t *glprogram, GLint location, GLsizei count, GLb
     }
     // update uniform
     memcpy(glprogram->cache.cache + m->cache_offs, v, rsize);
-    LOAD_GLES2_(glUniformMatrix2fv);
+    LOAD_GLES2(glUniformMatrix2fv);
     if (gles_glUniformMatrix2fv) {
         gles_glUniformMatrix2fv(m->id, count, GL_FALSE, v);
         errorGL();
@@ -628,7 +628,7 @@ void GoUniformMatrix3fv(program_t *glprogram, GLint location, GLsizei count, GLb
     }
     // update uniform
     memcpy(glprogram->cache.cache + m->cache_offs, v, rsize);
-    LOAD_GLES2_(glUniformMatrix3fv);
+    LOAD_GLES2(glUniformMatrix3fv);
     if (gles_glUniformMatrix3fv) {
         gles_glUniformMatrix3fv(m->id, count, GL_FALSE, v);
         errorGL();
@@ -690,7 +690,7 @@ void GoUniformMatrix4fv(program_t *glprogram, GLint location, GLsizei count, GLb
     }
     // update uniform
     memcpy(glprogram->cache.cache + m->cache_offs, v, rsize);
-    LOAD_GLES2_(glUniformMatrix4fv);
+    LOAD_GLES2(glUniformMatrix4fv);
     if (gles_glUniformMatrix4fv) {
         gles_glUniformMatrix4fv(m->id, count, GL_FALSE, v);
         errorGL();
@@ -794,7 +794,7 @@ GLvoid glGetUniformfvARB(GLhandleARB programObj, GLint location, GLfloat *params
 GLvoid glGetUniformivARB(GLhandleARB programObj, GLint location, GLint *params) AliasExport("gl4es_glGetUniformiv");
 
 // ===============
-void glProgramUniform1f(GLuint program, GLint location, GLfloat v0) AliasExport("gl4es_glProgramUniform1f");
+/*void glProgramUniform1f(GLuint program, GLint location, GLfloat v0) AliasExport("gl4es_glProgramUniform1f");
 void glProgramUniform2f(GLuint program, GLint location, GLfloat v0, GLfloat v1) AliasExport("gl4es_glProgramUniform2f");
 void glProgramUniform3f(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2) AliasExport("gl4es_glProgramUniform3f");
 void glProgramUniform4f(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) AliasExport("gl4es_glProgramUniform4f");
@@ -813,6 +813,7 @@ void glProgramUniform4iv(GLuint program, GLint location, GLsizei count, const GL
 void glProgramUniformMatrix2fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) AliasExport("gl4es_glProgramUniformMatrix2fv");
 void glProgramUniformMatrix3fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) AliasExport("gl4es_glProgramUniformMatrix3fv");
 void glProgramUniformMatrix4fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat *value) AliasExport("gl4es_glProgramUniformMatrix4fv");
+*/
 // ===============	EXT_direct_state_access (part of it)
 void glProgramUniform1fEXT(GLuint program, GLint location, GLfloat v0) AliasExport("gl4es_glProgramUniform1f");
 void glProgramUniform2fEXT(GLuint program, GLint location, GLfloat v0, GLfloat v1) AliasExport("gl4es_glProgramUniform2f");

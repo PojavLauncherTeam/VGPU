@@ -148,14 +148,13 @@ void load_libs() {
         vcos = open_lib(vcos_name, NULL);
     }
 #endif
-    gles = open_lib((globals4es.es==1)?gles2_lib:gles3_lib, LIB_GLES_NAME);
+    gles = open_lib((globals4es.es==1)?gles2_lib:gles3_lib, "libGLESv3.so");
     WARN_NULL(gles);
 
 #ifdef NOEGL
     egl = gles;
 #else
     const char *egl_override = GetEnvVar("LIBGL_EGL");
-    egl_override = LIB_EGL_NAME;
     egl = open_lib(egl_lib, egl_override);
 #endif
     WARN_NULL(egl);

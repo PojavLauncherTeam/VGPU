@@ -18,7 +18,7 @@ void gl4es_glCullFace(GLenum mode) {
     FLUSH_BEGINEND;
     
     glstate->face.cull = mode;
-    LOAD_GLES2_(glCullFace);
+    LOAD_GLES(glCullFace);
     gles_glCullFace(mode);
 }
 
@@ -36,7 +36,7 @@ void gl4es_glFrontFace(GLenum mode) {
     FLUSH_BEGINEND;
     
     glstate->face.front = mode;
-    LOAD_GLES2_(glFrontFace);
+    LOAD_GLES(glFrontFace);
     gles_glFrontFace(mode);
 }
 

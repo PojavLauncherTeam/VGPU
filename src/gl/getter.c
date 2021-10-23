@@ -20,7 +20,7 @@ GLenum gl4es_glGetError() {
     DBG(printf("glGetError(), noerror=%d, shim_error=%d\n", globals4es.noerror, glstate->shim_error);)
     if(globals4es.noerror)
         return GL_NO_ERROR;
-	LOAD_GLES_(glGetError);
+	LOAD_GLES(glGetError);
 	if (glstate->shim_error) {
         if(glstate->shim_error!=2)
             gles_glGetError();  // purge error log
@@ -246,7 +246,7 @@ const GLubyte *gl4es_glGetString(GLenum name) {
         case GL_PROGRAM_ERROR_STRING_ARB:
             return (const GLubyte*)glstate->glsl->error_msg;
     }
-	LOAD_GLES_(glGetString);
+	LOAD_GLES(glGetString);
     return gles_glGetString(name);
 }
 // const GLubyte *glGetString(GLenum name) AliasExport("gl4es_glGetString");
@@ -459,7 +459,7 @@ int gl4es_commonGet(GLenum pname, GLfloat *params) {
             break;
         case 0x8CDF:
             if(hardext.fbo){
-            	LOAD_GLES_(glGetIntegerv);
+            	LOAD_GLES(glGetIntegerv);
             	int a1;
                 // *params=hardext.maxcolorattach;
                 gles_glGetIntegerv(0x8CDF, &a1);
@@ -470,7 +470,7 @@ int gl4es_commonGet(GLenum pname, GLfloat *params) {
             break;
         case 0x8824:
             if(hardext.fbo){
-            	LOAD_GLES_(glGetIntegerv);
+            	LOAD_GLES(glGetIntegerv);
             	int a1;
                 // *params=hardext.maxdrawbuffers;
             	gles_glGetIntegerv(0x8824, &a1);
@@ -765,7 +765,7 @@ void gl4es_glGetIntegerv(GLenum pname, GLint *params) {
         return;
     }
     GLint dummy;
-    LOAD_GLES_(glGetIntegerv);
+    LOAD_GLES(glGetIntegerv);
     noerrorShim();
     GLfloat fparam;
     if (gl4es_commonGet(pname, &fparam)) {
@@ -858,7 +858,7 @@ void gl4es_glGetIntegerv(GLenum pname, GLint *params) {
 
 void gl4es_glGetFloatv(GLenum pname, GLfloat *params) {
     DBG(printf("glGetFloatv(%s, %p)\n", PrintEnum(pname), params);)
-    LOAD_GLES_(glGetFloatv);
+    LOAD_GLES(glGetFloatv);
     noerrorShim();
     if (gl4es_commonGet(pname, params)) {
         return;
@@ -926,7 +926,7 @@ void gl4es_glGetFloatv(GLenum pname, GLfloat *params) {
 void gl4es_glGetDoublev(GLenum pname, GLdouble *params) {
     DBG(printf("glGetDoublev(%s, %p)\n", PrintEnum(pname), params);)
     GLfloat tmp[4*4];
-    LOAD_GLES_(glGetFloatv);
+    LOAD_GLES(glGetFloatv);
     noerrorShim();
     if (gl4es_commonGet(pname, tmp)) {
         *params = *tmp;
@@ -1125,11 +1125,6 @@ void gl4es_glGetClipPlanef(GLenum plane, GLfloat * equation)
         noerrorShim();
         memcpy(equation, glstate->planes[p], 4*sizeof(GLfloat)); // should return transformed coordinates
     }
-    /*{
-        int p = plane-GL_CLIP_PLANE0;
-        noerrorShim();
-        memcpy(equation, glstate->planes[p], 4*sizeof(GLfloat)); // should return transformed coordinates
-    }*/
 }
 //void glGetClipPlanef(GLenum plane, GLfloat * equation) AliasExport("gl4es_glGetClipPlanef");
 

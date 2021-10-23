@@ -22,11 +22,11 @@ hardext_t hardext = {0};
 
 static int testGLSL(const char* version, int uniformLoc) {
     // check if glsl 120 shaders are supported... by compiling one !
-    LOAD_GLES2_(glCreateShader);
-    LOAD_GLES2_(glShaderSource);
-    LOAD_GLES2_(glCompileShader);
-    LOAD_GLES2_(glGetShaderiv);
-    LOAD_GLES2_(glDeleteShader);
+    LOAD_GLES2(glCreateShader);
+    LOAD_GLES2(glShaderSource);
+    LOAD_GLES2(glCompileShader);
+    LOAD_GLES2(glGetShaderiv);
+    LOAD_GLES2(glDeleteShader);
 
     GLuint shad = gles_glCreateShader(GL_VERTEX_SHADER);
     const char* shadTest[4] = {
@@ -44,7 +44,7 @@ static int testGLSL(const char* version, int uniformLoc) {
     gles_glGetShaderiv(shad, GL_COMPILE_STATUS, &compiled);
     /*
     if(!compiled) {
-        LOAD_GLES2_(glGetShaderInfoLog)
+        LOAD_GLES2(glGetShaderInfoLog)
         char buff[500];
         gles_glGetShaderInfoLog(shad, 500, NULL, buff);
         printf("LIBGL: \"%s\" failed, message:\n%s\n", version, buff);
@@ -57,11 +57,11 @@ static int testGLSL(const char* version, int uniformLoc) {
 
 /*
 static int testMAXdrawbuffers(const char* number) {
-    LOAD_GLES2_(glCreateShader);
-    LOAD_GLES2_(glShaderSource);
-    LOAD_GLES2_(glCompileShader);
-    LOAD_GLES2_(glGetShaderiv);
-    LOAD_GLES2_(glDeleteShader);
+    LOAD_GLES2(glCreateShader);
+    LOAD_GLES2(glShaderSource);
+    LOAD_GLES2(glCompileShader);
+    LOAD_GLES2(glGetShaderiv);
+    LOAD_GLES2(glDeleteShader);
 
     GLuint shad = gles_glCreateShader(GL_FRAGMENT_SHADER);
     const char* shadTest[3] = {
@@ -78,7 +78,7 @@ static int testMAXdrawbuffers(const char* number) {
     gles_glGetShaderiv(shad, GL_COMPILE_STATUS, &compiled);
     
     if(!compiled) {
-        LOAD_GLES2_(glGetShaderInfoLog)
+        LOAD_GLES2(glGetShaderInfoLog)
         char buff[500];
         gles_glGetShaderInfoLog(shad, 500, NULL, buff);
         SHUT_LOGD("========\nLIBGL: compile failed, message:\n%s\n", buff);
@@ -92,11 +92,11 @@ static int testMAXdrawbuffers(const char* number) {
 
 
 static int testTextureCubeLod() {
-    LOAD_GLES2_(glCreateShader);
-    LOAD_GLES2_(glShaderSource);
-    LOAD_GLES2_(glCompileShader);
-    LOAD_GLES2_(glGetShaderiv);
-    LOAD_GLES2_(glDeleteShader);
+    LOAD_GLES2(glCreateShader);
+    LOAD_GLES2(glShaderSource);
+    LOAD_GLES2(glCompileShader);
+    LOAD_GLES2(glGetShaderiv);
+    LOAD_GLES2(glDeleteShader);
 
     GLuint shad = gles_glCreateShader(GL_FRAGMENT_SHADER);
     const char* shadTest[3] = {
@@ -188,7 +188,7 @@ void GetHardwareExtensions(int notest)
 
     // Create a PBuffer first...
     EGLint egl_context_attrib_es2[] = {
-        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_CONTEXT_CLIENT_VERSION, 3,
         EGL_NONE
     };
 
@@ -220,7 +220,7 @@ void GetHardwareExtensions(int notest)
         EGL_ALPHA_SIZE, 8,
 #endif
         EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-        EGL_RENDERABLE_TYPE, (hardext.esversion==1)?EGL_OPENGL_ES_BIT:EGL_OPENGL_ES2_BIT,
+        EGL_RENDERABLE_TYPE, (hardext.esversion==1)?EGL_OPENGL_ES2_BIT:EGL_OPENGL_ES3_BIT,
         EGL_NONE
     };
 
@@ -267,7 +267,7 @@ void GetHardwareExtensions(int notest)
         egl_eglTerminate(eglDisplay);
         return;
     }
-    eglContext = egl_eglCreateContext(eglDisplay, pbufConfigs[0], EGL_NO_CONTEXT, egl_context_attrib_es2);
+    eglContext = egl_eglCreateContext(eglDisplay, pbufConfigs[0], EGL_NO_CONTEXT, (hardext.esversion==1)?egl_context_attrib:egl_context_attrib_es2);
     if(!eglContext) {
         SHUT_LOGE("Error while gathering supported extension (eglCreateContext: %s), default to none\n", PrintEGLError(0));
         return;
@@ -283,9 +283,9 @@ void GetHardwareExtensions(int notest)
 #endif
     tested = 1;
     
-    LOAD_GLES2_(glGetString);
-    LOAD_GLES2_(glGetIntegerv);
-    LOAD_GLES2_(glGetError);
+    LOAD_GLES2(glGetString);
+    LOAD_GLES2(glGetIntegerv);
+    LOAD_GLES2(glGetError);
     // Now get extensions
     const char* Exts = gles_glGetString(GL_EXTENSIONS);
     SHUT_LOGD("\n========\nGL_EXTENSIONS is :\n%s\n========\n", Exts);
@@ -365,7 +365,7 @@ void GetHardwareExtensions(int notest)
             S("GL_OES_fragment_precision_high ", highp, 1);
             if(!hardext.highp) {
                 // check if highp is supported anyway
-                LOAD_GLES2_(glGetShaderPrecisionFormat);
+                LOAD_GLES2(glGetShaderPrecisionFormat);
                 if(gles_glGetShaderPrecisionFormat) {
                     GLint range[2] = {0};
                     GLint precision=0;
@@ -446,7 +446,7 @@ void GetHardwareExtensions(int notest)
     */
     SHUT_LOGD("Max Color Attachments: %d / Draw buffers: %d\n", hardext.maxcolorattach, hardext.maxdrawbuffers);
     
-    //LOAD_GLES2_(glHint);
+    //LOAD_GLES2(glHint);
     
     
     
@@ -459,8 +459,6 @@ void GetHardwareExtensions(int notest)
         hardext.vendor = VEND_ARM;
     else if(strstr(vendor, "Imagination Technologies"))
         hardext.vendor = VEND_IMGTEC;
-    
-    printf("VGPU: Begin testGLSL\n");
     if(hardext.esversion>1) {
         if(testGLSL("#version 120", 1))
             hardext.glsl120 = 1;
@@ -483,9 +481,9 @@ void GetHardwareExtensions(int notest)
     if(hardext.glsl320es) {
         SHUT_LOGD("GLSL 320 es supported%s\n", hardext.glsl120?"":" and used");
     }
-    
-    printf("VGPU: End testGLSL\n");
-    
+    //int binary_formats[4] = {0};
+    //gles_glGetIntegerv(GL_SHADER_BINARY_FORMATS, binary_formats);
+    //SHUT_LOGD("gl_shader_binary_formats : %x, %x ", binary_formats[0], binary_formats[1]);
     /*
     if(testMAXdrawbuffers("8")){
     	SHUT_LOGD("GLSL supported MAXdrawbuffers = 8 \n");
@@ -512,17 +510,13 @@ void GetHardwareExtensions(int notest)
         SHUT_LOGD("EGLImage to RenderBuffer supported\n");
         hardext.khr_renderbuffer = 1;
     }
-	
-	
-    printf("VGPU: Begin cleanup EGL\n");
+
     // End, cleanup
-    int pot;
     egl_eglMakeCurrent(eglDisplay, 0, 0, EGL_NO_CONTEXT);
-    pot= egl_eglDestroySurface(eglDisplay, eglSurface);
-    pot= egl_eglDestroyContext(eglDisplay, eglContext);
-    printf("VGPU: End cleanup EGL\n");
-    pot= egl_eglTerminate(eglDisplay);
-    printf("VGPU: End2 cleanup EGL\n");
+    egl_eglDestroySurface(eglDisplay, eglSurface);
+    egl_eglDestroyContext(eglDisplay, eglContext);
+
+    egl_eglTerminate(eglDisplay);
     
 #endif
 }

@@ -16,8 +16,6 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_C_INCLUDES) -DBCMHOST
 
 LOCAL_SRC_FILES := \
 	src/gl/pack/pack.c \
-	src/gl/pack/load.c \
-	src/gl/pack/Initialization.c \
 	src/gl/pack/shaderconv.c \
 	src/gl/pack/shader.c \
 	src/glx/hardext.c \
@@ -94,8 +92,7 @@ LOCAL_SRC_FILES := \
 	src/gl/matvec.c \
 		
 
-LOCAL_CFLAGS += -g -O3 -include include/android_debug.h
-#LOCAL_CFLAGS += -funwind-tables -fvisibility=hidden
+LOCAL_CFLAGS += -g -funwind-tables -O3 -fvisibility=hidden -include include/android_debug.h
 LOCAL_CFLAGS += -DNOX11
 LOCAL_CFLAGS += -DNO_GBM
 #LOCAL_CFLAGS += -DNO_INIT_CONSTRUCTOR

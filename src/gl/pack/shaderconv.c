@@ -9,7 +9,6 @@
 
 #include <android/log.h>
 #define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
-//#define Printf(...) printf(__VA_ARGS__)
 
 //#define Printf(...) printf(__VA_ARGS__)
 
@@ -56,8 +55,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
-  	//add_marker(glshader_converted);
-  	if(strstr(*glshader_converted, "@@@@FIX_MARKER_VGPU@@")){
+  	add_marker(glshader_converted);
+  	if(strstr(*glshader_converted, "@@FIX_MARKER_VGPU@@")){
   		Printf("add marker succeed!");
   	}else{
   		Printf("failed to add marker!");
@@ -73,10 +72,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	fix_layout(glshader_converted);
   	if(vsh){
   		//pot = replace("gl_VertexID", "float(gl_VertexID)", glshader_converted);
-  		/*
   		fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
   		fix_int_build_in_variable("gl_InstanceID", glshader_converted, GL_INT_);
-  		*/
   	}else{
   		//fix_int_build_in_variable("gl_VertexID", glshader_converted);
   	}
@@ -104,7 +101,6 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	pot = replace("textureGather", "textureGather_", glshader_converted);	//Printf("Calling %d ", __LINE__);
 	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	//Printf("Calling %d ", __LINE__);
 	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
-	replace_func_name("sample", "sample__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
 	//}
 	
 	int cut_in_offset;
@@ -1386,23 +1382,15 @@ void replace_func_name(char *A, char *B, char **source, int mode){//				Printf("
 			if(ptrm[m]==' ' || ptrm[m]=='\n'){
 				continue;
 			}
-			/*
-			if(ptrm[m]==';' || ptrm[m]==',' || ptrm[m]=='.' ||
-			  ptrm[m]=='=' || ptrm[m]=='+' || ptrm[m]=='-' || ptrm[m]=='/' |ptrm[m]=='*'){
-				isfunc = VARIABLE_NAME;
-				//isfunc = 3;
-				break;
-    		}*/
 			if(ptrm[m]=='('){
 				isfunc = FUNCTION_NAME;
 				//isfunc = 2;
 				break;
-    		}else{
-				if(judge_name(ptrm+m)==0){
-    				isfunc = VARIABLE_NAME;
-    				//isfunc = 3;
-    				break;
-    			}
+    		}
+			if(ptrm[m]==';' || ptrm[m]==',' || ptrm[m]=='.'){
+				isfunc = VARIABLE_NAME;
+				//isfunc = 3;
+				break;
     		}
     		isfunc = 0;
     		break;
@@ -1864,7 +1852,7 @@ void add_marker(char **converted){// ##FIX_MARKER_VGPU##
 	return;
 }
 void fix_marker(char **converted){
-	char * find_marker = strstr(*converted, "@@@@FIX_MARKER_VGPU@@");
+	char * find_marker = strstr(*converted, "@@FIX_MARKER_VGPU@@");
 	if(find_marker!=NULL){
 		*find_marker='\0';
 		Printf("find marker succeed!");
