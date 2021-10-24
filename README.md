@@ -3,7 +3,6 @@ The project is a bit like GL4ES, where I want to implement a hardware-accelerate
 # Current Status
 GLAPI wrap:
 Most of the GL2.x API and a small amount of GL3.x API(mainly texture and Uniform, because some of the special built-in variables of GLSL120 are now provided by GL4ES by combining API(glUniform) with shader string converters, such as gl_Vertex) now call gl4es.
-Most of the GL3.0 to GL4.6 apis are now simply wrapped up.
 
 Global Implicit Type Conversion:
 Supported:
@@ -26,5 +25,5 @@ not supported declaring array sizes with simple variables initialized to constan
 The % mod operator is not yet supported (this causes MC1.17 to fail because shader uses %)
 
 
-About mipmap:
-Now I'm trying to rebuild the mipmap converter.
+# About vk
+Now and in the future I will work mainly on the vgpu_vk branch.

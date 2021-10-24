@@ -1,6 +1,10 @@
 
 
 
+extern char * old_version;
+extern char * new_version;
+
+
 #define SHADOW 0x00
 #define TEXTURE 0x02
 

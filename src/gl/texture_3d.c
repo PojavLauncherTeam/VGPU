@@ -67,4 +67,4 @@ void glTexSubImage3DARB(GLenum target, GLint level, GLint xoffset, GLint yoffset
 void glCopyTexSubImage3DARB(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height) AliasExport("gl4es_glCopyTexSubImage3D");
 
 // TexStorage
-//void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) AliasExport("gl4es_glTexStorage3D");
+void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) AliasExport("gl4es_glTexStorage3D");

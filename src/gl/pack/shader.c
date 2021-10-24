@@ -1,6 +1,5 @@
 // Some extra functions
 
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -9,9 +8,8 @@
 //int find(char *, char *, char **, char **, int *);
 //int replace(char *, char *, char **);
 
-#include <android/log.h>
-#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
-//#define Printf(...) printf(__VA_ARGS__)
+#include "printf_def.h"
+
 
 #include "shader.h"
 

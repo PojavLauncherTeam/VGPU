@@ -7,28 +7,11 @@
 #include "shaderconv.h"
 #include "shader.h"
 
-#include <android/log.h>
-#define Printf(...) __android_log_print(ANDROID_LOG_INFO, "LIBGL", __VA_ARGS__)
+#include "printf_def.h"
 
-//#define Printf(...) printf(__VA_ARGS__)
-
-/*#define Printf_ \
-		Printf("========NewConvertShader : \n"); \
-        lenS = strlen(*glshader_converted); \
-        for(int len=0; len<lenS; len+=1023){ \
-        	Printf("%s", *glshader_converted+len); \
-        } \
-        Printf("\n========\n ");
-
-
-#define Printf_G \
-		Printf(">>>>>>>>NewConvertShader : \n"); \
-        lenS = strlen(*source); \
-        for(int len=0; len<lenS; len+=1023){ \
-        	Printf("%s", *source+len); \
-        } \
-        Printf("\n>>>>>>>>\n ");*/
-
+char * old_version = "#version 120";
+//char * new_version = "#version 450 compatibility";
+char * new_version = "#version 320 es";
 
 
 
@@ -55,25 +38,29 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
   	
   	// ======== some auxiliary things
   	//pot = replace("__VERSION__", "440", glshader_converted);//				Printf("!", __LINE__);
-  	add_marker(glshader_converted);
-  	if(strstr(*glshader_converted, "@@FIX_MARKER_VGPU@@")){
+  	//add_marker(glshader_converted);
+  	if(strstr(*glshader_converted, "@@@@FIX_MARKER_VGPU@@")){
   		Printf("add marker succeed!");
   	}else{
   		Printf("failed to add marker!");
   	}
+  	/*
   	if(vsh){
   		in_to_attribute(glshader_converted);				// in >> attribute
   	}
+  	*/
   	GLSLHeader(glshader_converted);
   	fix_const("const ", glshader_converted);
   	//pot = replace("#ext", "//#ext", glshader_converted);				// #extension
   	
   	// >>>>fixed for GLSL3.x
-  	fix_layout(glshader_converted);
+  	//fix_layout(glshader_converted);
   	if(vsh){
   		//pot = replace("gl_VertexID", "float(gl_VertexID)", glshader_converted);
+  		/*
   		fix_int_build_in_variable("gl_VertexID", glshader_converted, GL_INT_);
   		fix_int_build_in_variable("gl_InstanceID", glshader_converted, GL_INT_);
+  		*/
   	}else{
   		//fix_int_build_in_variable("gl_VertexID", glshader_converted);
   	}
@@ -92,23 +79,27 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 		pot = replace("varying", "in", glshader_converted);//				Printf("!", __LINE__);
 	}
 	
+	
 	// ======== Built-in function
 	pot = replace("texture2D", "texture", glshader_converted);
 	//char * isshadow = strstr(*glshader_converted, "shadow");				printf("shadow = %p \n", isshadow);
 	//if(isshadow){
+	
 	pot = replace("textureSize", "textureSize_", glshader_converted);				// Fix functions that contain integer type.
 	pot = replace("texelFetch", "texelFetch_", glshader_converted);
 	pot = replace("textureGather", "textureGather_", glshader_converted);	//Printf("Calling %d ", __LINE__);
 	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	//Printf("Calling %d ", __LINE__);
+	
 	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+	replace_func_name("sample", "sample__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
 	//}
 	
 	int cut_in_offset;
   	int isextension = find_extension(glshader_converted, &cut_in_offset);	Printf("extension = %d ", isextension);
   	if(isextension==0){
-  		char * ptr_offset = strstr(*glshader_converted, "0 es");//				Printf(" cut_in_offset = %d ", cut_in_offset);
+  		char * ptr_offset = strstr(*glshader_converted, new_version);//				Printf(" cut_in_offset = %d ", cut_in_offset);
   		if(ptr_offset){
-  			cut_in_offset = ptr_offset + 5 - *glshader_converted;//				Printf(" cut_in_offset = %d ", cut_in_offset);
+  			cut_in_offset = ptr_offset + strlen(new_version) + 2 - *glshader_converted;//				Printf(" cut_in_offset = %d ", cut_in_offset);
   		}else{
   			cut_in_offset = 0;
   		}
@@ -122,6 +113,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	// ======== Built-in variable
 	
 	if(!vsh){
+		
 		char * gl_FragColor = strstr(*glshader_converted, "gl_FragColor");//				Printf("!", __LINE__);
 		if(gl_FragColor){
 			pot = replace("gl_FragColor", "FragColor", glshader_converted);//				Printf("!", __LINE__);
@@ -145,6 +137,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
     			replace_gl_FragData(7)
     		}
 		}
+		
 	}
 	
 	
@@ -190,6 +183,62 @@ static char _shadow2D[]=
 "precision highp vec3; precision mediump ivec3;\n"
 "precision highp vec4; precision mediump ivec4;\n"
 */
+/*
+"vec4 texelFetch_(sampler2D tex, vec2 P, float lod){\n"				// Fix functions that contain integer type.
+" return texelFetch(tex, ivec2(int(P.x), int(P.y)), int(lod));\n"
+"}"
+"vec4 texelFetch_Offset_(sampler2D tex, vec2 P, float lod, vec2 offset){\n"				// texelFetchOffset
+" return texelFetch(tex, ivec2(int(P.x), int(P.y))+ivec2(int(offset.x), int(offset.y)), int(lod));\n"
+"}"
+"vec4 textureLodOffset_(sampler2D tex, vec2 P, float lod, vec2 offset){\n"				// textureLodOffset
+" ivec2 Size = textureSize(tex, 0);\n"
+" return textureLod(tex, P+offset/vec2(float(Size.x), float(Size.y)), lod);\n"
+"}"
+"vec4 textureGradOffset_(sampler2D tex, vec2 P, vec2 dPdx, vec2 dPdy, vec2 offset){\n"				// textureGradOffset
+" ivec2 Size = textureSize(tex, 0);\n"
+" return textureGrad(tex, P+offset/vec2(float(Size.x), float(Size.y)), dPdx, dPdy);\n"
+"}"
+"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset){\n"				// textureOffset
+" ivec2 Size = textureSize(tex, 0);\n"
+" return texture(tex, P+offset/vec2(float(Size.x), float(Size.y)));\n"
+"}"
+"vec4 textureOffset_(sampler2D tex, vec2 P, vec2 offset, float bias){\n"
+" ivec2 Size = textureSize(tex, 0);\n"
+" return texture(tex, P+offset/vec2(float(Size.x), float(Size.y)), bias);\n"
+"}"
+"vec2 textureSize_(sampler2D tex, float lod){\n"				// textureSize
+" ivec2 Size = textureSize(tex, int(lod));\n"
+" return vec2(float(Size.x), float(Size.y));\n"
+"}"
+"vec2 textureSize_(sampler2DShadow tex, float lod){\n"
+" ivec2 Size = textureSize(tex, int(lod));\n"
+" return vec2(float(Size.x), float(Size.y));\n"
+"}"
+"vec4 textureGather_(sampler2D tex, vec2 P){\n"				// textureGather
+" return textureGather(tex, P);\n"
+"}"
+"vec4 textureGather_(sampler2D tex, vec2 P, float comp){\n"
+" return textureGather(tex, P, int(comp));\n"
+"}"
+"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset){\n"
+" ivec2 Size = textureSize(tex, 0);\n"
+" return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)));\n"
+"}"
+"vec4 textureGather_Offset_(sampler2D tex, vec2 P, vec2 offset, float comp){\n"
+" ivec2 Size = textureSize(tex, 0);\n"
+" return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)), int(comp));\n"
+"}"
+"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, int level){\n"
+" return vec3(textureLod(shadow, coord, float(level)), 0.0, 0.0);\n"
+"}"
+"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, float level){\n"				// shadow2D wrapper
+" return vec3(textureLod(shadow, coord, level), 0.0, 0.0);\n"
+"}"
+"vec3 shadow2D(sampler2DShadow shadow, vec3 coord){\n"
+" return vec3(texture(shadow, coord), 0.0, 0.0);\n"
+"}\n"
+*/
+
 "vec4 texelFetch_(sampler2D tex, vec2 P, float lod){\n"				// Fix functions that contain integer type.
 " return texelFetch(tex, ivec2(int(P.x), int(P.y)), int(lod));\n"
 "}"
@@ -262,16 +311,16 @@ void func_build_in(char **converted, int cut_in_offset, int type){//				Printf("
 
 void GLSLHeader(char **source){
 	int pot;
-	if(hardext.glsl320es){
-  		pot = replace_common("#version 100", "#version 320 es", source, 1);
+	if(hardext.glsl320es){		// pack/shaderconv.h shaderconv.c: old_version new_version
+  		pot = replace_common(old_version, new_version, source, 1);
   		return;
   	}
   	if(hardext.glsl310es){
-  		pot = replace_common("#version 100", "#version 310 es", source, 1);
+  		pot = replace_common(old_version, new_version, source, 1);
   		return;
   	}
   	if(hardext.glsl300es){
-  		pot = replace_common("#version 100", "#version 300 es", source, 1);
+  		pot = replace_common(old_version, new_version, source, 1);
   		return;
   	}
   	return;
@@ -1382,15 +1431,23 @@ void replace_func_name(char *A, char *B, char **source, int mode){//				Printf("
 			if(ptrm[m]==' ' || ptrm[m]=='\n'){
 				continue;
 			}
+			/*
+			if(ptrm[m]==';' || ptrm[m]==',' || ptrm[m]=='.' ||
+			  ptrm[m]=='=' || ptrm[m]=='+' || ptrm[m]=='-' || ptrm[m]=='/' |ptrm[m]=='*'){
+				isfunc = VARIABLE_NAME;
+				//isfunc = 3;
+				break;
+    		}*/
 			if(ptrm[m]=='('){
 				isfunc = FUNCTION_NAME;
 				//isfunc = 2;
 				break;
-    		}
-			if(ptrm[m]==';' || ptrm[m]==',' || ptrm[m]=='.'){
-				isfunc = VARIABLE_NAME;
-				//isfunc = 3;
-				break;
+    		}else{
+				if(judge_name(ptrm+m)==0){
+    				isfunc = VARIABLE_NAME;
+    				//isfunc = 3;
+    				break;
+    			}
     		}
     		isfunc = 0;
     		break;
@@ -1852,7 +1909,7 @@ void add_marker(char **converted){// ##FIX_MARKER_VGPU##
 	return;
 }
 void fix_marker(char **converted){
-	char * find_marker = strstr(*converted, "@@FIX_MARKER_VGPU@@");
+	char * find_marker = strstr(*converted, "@@@@FIX_MARKER_VGPU@@");
 	if(find_marker!=NULL){
 		*find_marker='\0';
 		Printf("find marker succeed!");
