@@ -90,8 +90,8 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	pot = replace("textureGather", "textureGather_", glshader_converted);	//Printf("Calling %d ", __LINE__);
 	replace_func_name("Offset", "Offset_", glshader_converted, FUNCTION_NAME);	//Printf("Calling %d ", __LINE__);
 	
-	replace_func_name("texture", "texture__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
-	replace_func_name("sample", "sample__", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+	replace_func_name("texture", "texture_t", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+	replace_func_name("sample", "sample_t", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
 	//}
 	
 	int cut_in_offset;
