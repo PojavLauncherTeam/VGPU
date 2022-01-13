@@ -92,6 +92,7 @@ void shader_conv_(char **glshader_source, char **glshader_converted){//				Print
 	
 	replace_func_name("texture", "texture_t", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
 	replace_func_name("sample", "sample_t", glshader_converted, VARIABLE_NAME);	//Printf("Calling %d ", __LINE__);						// Prevent conflict between variable name and function name.
+        replace_func_name("distance", "distance_t", glshader_converted, VARIABLE_NAME); 
 	//}
 	
 	int cut_in_offset;
