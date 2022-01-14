@@ -226,6 +226,7 @@ static char _shadow2D[]=
 " ivec2 Size = textureSize(tex, int(lod));\n"
 " return vec2(float(Size.x), float(Size.y));\n"
 "}"
+"\n#if __VERSION__ >= 310\n"
 "vec4 textureGather_(sampler2D tex, vec2 P){\n"				// textureGather
 " return textureGather(tex, P);\n"
 "}"
@@ -240,6 +241,7 @@ static char _shadow2D[]=
 " ivec2 Size = textureSize(tex, 0);\n"
 " return textureGather(tex, P+offset/vec2(float(Size.x), float(Size.y)), int(comp));\n"
 "}"*/
+"\n#endif\n"
 /*"vec3 shadow2DLod(sampler2DShadow shadow, vec3 coord, int level){\n"
 " return vec3(textureLod(shadow, coord, float(level)), 0.0, 0.0);\n"
 "}"*/

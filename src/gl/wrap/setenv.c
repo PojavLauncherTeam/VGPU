@@ -2,6 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define ENV_NUM 2
+char * SETENVS[ENV_NUM] = {
+	"LIBGL_NORMALIZE=1",
+	"LIBGL_MIPMAP=3"
+	//"LIBGL_FB=2"
+};
+
 void SetEnv(char *envname, int value){
 	int len = snprintf(NULL, 0, "%d", value);
 	len++;

@@ -11,11 +11,5 @@ extern void allSetEnv(void);
 #define LIBGL_FBOFORCETEX "LIBGL_FBOFORCETEX"
 #define LIBGL_NORMALIZE "LIBGL_NORMALIZE"
 */
-#define ENV_NUM 2
-char * SETENVS[ENV_NUM] = {
-	"LIBGL_NORMALIZE=1",
-	"LIBGL_MIPMAP=3"
-	//"LIBGL_FB=2"
-};
 
-#include "setenv.c"
+//#include "setenv.c"
