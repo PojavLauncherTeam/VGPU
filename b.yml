@@ -1,0 +1,33 @@
+name: Build VGPU
+
+on: [push, workflow_dispatch]
+
+jobs:
+
+  build-android:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Build VGPU
+
+        run: |
+
+         # wget https://dl.google.com/android/repository/android-ndk-r25c-linux.zip
+
+         # unzip android-ndk-r25c-linux.zip >> /dev/null
+
+         $ANDROID_NDK_HOME/ndk-build APP_BUILD_SCRIPT=./Android.mk NDK_PROJECT_PATH=,
+
+      - name: Upload VGPU libs
+
+        uses: actions/upload-artifact@v3
+
+        with:
+
+          name: vgpu
+
+          path: ./
